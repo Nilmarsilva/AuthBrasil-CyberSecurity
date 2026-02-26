@@ -28,6 +28,7 @@ import {
   Edit2,
   Trash2,
   Terminal,
+  Slack,
   Eye,
   GitBranch,
   Globe,
@@ -64,6 +65,14 @@ interface ApiKeyData {
   isVisible: boolean;
 }
 
+interface IntegrationData {
+  id: string;
+  name: string;
+  status: string;
+  icon: any;
+  iconColor: string;
+}
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
@@ -75,6 +84,16 @@ export default function SettingsPage() {
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [newApiKeyName, setNewApiKeyName] = useState('');
+  const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
+  const [isEditIntegrationModalOpen, setIsEditIntegrationModalOpen] = useState(false);
+  const [editingIntegration, setEditingIntegration] = useState<IntegrationData | null>(null);
+  const [integrationToDelete, setIntegrationToDelete] = useState<string | null>(null);
+  const [integrationForm, setIntegrationForm] = useState({
+    name: '',
+    status: 'Conectado',
+    type: 'github'
+  });
+
   const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([
     {
       id: 'ak_1',
@@ -84,6 +103,12 @@ export default function SettingsPage() {
       lastUsed: 'Há 2 horas',
       isVisible: false
     }
+  ]);
+
+  const [integrations, setIntegrations] = useState<IntegrationData[]>([
+    { id: 'int_1', name: 'GitHub', status: 'Conectado', icon: Github, iconColor: 'text-white' },
+    { id: 'int_2', name: 'Redis Cache', status: 'Online', icon: Database, iconColor: 'text-red-500' },
+    { id: 'int_3', name: 'Webhooks', status: '2 Endpoints ativos', icon: Webhook, iconColor: 'text-yellow-500' }
   ]);
   const [webhooks, setWebhooks] = useState<WebhookData[]>([
     {
@@ -224,6 +249,61 @@ export default function SettingsPage() {
         createdAt: 'Agora'
       } : k));
       alert('Chave rotacionada com sucesso!');
+    }
+  };
+
+  const handleSaveIntegration = () => {
+    const iconMap: any = {
+      github: Github,
+      database: Database,
+      webhook: Webhook,
+      slack: Slack,
+      terminal: Terminal
+    };
+    const colorMap: any = {
+      github: 'text-white',
+      database: 'text-red-500',
+      webhook: 'text-yellow-500',
+      slack: 'text-purple-400',
+      terminal: 'text-primary'
+    };
+
+    const newIntegration: IntegrationData = {
+      id: `int_${Date.now()}`,
+      name: integrationForm.name || 'Nova Integração',
+      status: integrationForm.status,
+      icon: iconMap[integrationForm.type] || Github,
+      iconColor: colorMap[integrationForm.type] || 'text-white'
+    };
+
+    setIntegrations([...integrations, newIntegration]);
+    setIsIntegrationModalOpen(false);
+    setIntegrationForm({ name: '', status: 'Conectado', type: 'github' });
+    alert('Integração adicionada com sucesso!');
+  };
+
+  const handleEditIntegration = (integration: IntegrationData) => {
+    setEditingIntegration({ ...integration });
+    setIsEditIntegrationModalOpen(true);
+  };
+
+  const handleUpdateIntegration = () => {
+    if (!editingIntegration) return;
+    setIntegrations(integrations.map(i => i.id === editingIntegration.id ? editingIntegration : i));
+    setIsEditIntegrationModalOpen(false);
+    alert('Integração atualizada!');
+  };
+
+  const handleDeleteIntegration = (id: string) => {
+    setIntegrationToDelete(id);
+  };
+
+  const confirmDeleteIntegration = () => {
+    if (integrationToDelete) {
+      setIntegrations(integrations.filter(i => i.id !== integrationToDelete));
+      setIntegrationToDelete(null);
+      setIsEditIntegrationModalOpen(false);
+      alert('Integração removida!');
     }
   };
 
@@ -847,53 +927,46 @@ export default function SettingsPage() {
             <div className={`rounded-2xl border border-border-dark bg-surface-dark-alt/50 p-6 flex flex-col gap-4 transition-all duration-300 ${activeTab === 'integrations' ? 'lg:mt-14' : ''}`}>
               <h3 className="text-lg font-bold text-white mb-2">Integrações Ativas</h3>
               
-              {/* GitHub */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-border-dark hover:border-slate-600 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-white/5">
-                    <Github className="size-6 text-white" />
+              {integrations.map((integration) => (
+                <div key={integration.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-border-dark hover:border-slate-600 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-white/5">
+                      <integration.icon className={`size-6 ${integration.iconColor}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{integration.name}</p>
+                      <p className="text-xs text-green-400 flex items-center gap-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${integration.status.toLowerCase().includes('conectado') || integration.status.toLowerCase().includes('online') ? 'bg-green-400' : 'bg-slate-500'}`}></span> {integration.status}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">GitHub</p>
-                    <p className="text-xs text-green-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span> Conectado
-                    </p>
-                  </div>
-                </div>
-                <MoreVertical className="size-5 text-slate-500 cursor-pointer hover:text-white" />
-              </div>
-
-              {/* Redis */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-border-dark hover:border-slate-600 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-white/5">
-                    <Database className="size-6 text-red-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">Redis Cache</p>
-                    <p className="text-xs text-green-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span> Online
-                    </p>
-                  </div>
-                </div>
-                <MoreVertical className="size-5 text-slate-500 cursor-pointer hover:text-white" />
-              </div>
-
-              {/* Webhooks */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-border-dark hover:border-slate-600 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-white/5">
-                    <Webhook className="size-6 text-yellow-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">Webhooks</p>
-                    <p className="text-xs text-slate-400">2 Endpoints ativos</p>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => handleEditIntegration(integration)}
+                      className="p-1.5 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <Edit2 className="size-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteIntegration(integration.id)}
+                      className="p-1.5 text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
                   </div>
                 </div>
-                <MoreVertical className="size-5 text-slate-500 cursor-pointer hover:text-white" />
-              </div>
+              ))}
 
-              <button className="w-full mt-2 py-2 border border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer">
+              {integrations.length === 0 && (
+                <div className="text-center py-6 border border-dashed border-white/5 rounded-xl">
+                  <p className="text-slate-500 text-xs">Nenhuma integração ativa.</p>
+                </div>
+              )}
+
+              <button 
+                onClick={() => setIsIntegrationModalOpen(true)}
+                className="w-full mt-2 py-2 border border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
                 <Plus className="size-4" /> Adicionar Integração
               </button>
             </div>
@@ -1295,6 +1368,183 @@ export default function SettingsPage() {
                   className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
                 >
                   Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Integration Modal */}
+      <AnimatePresence>
+        {isIntegrationModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background-dark/90 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#0f172a] border border-white/10 shadow-[0_0_50px_rgba(19,91,236,0.2)] w-full max-w-md rounded-3xl overflow-hidden p-8 flex flex-col gap-6"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                  <Plus className="size-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Nova Integração</h2>
+                  <p className="text-xs text-slate-400 uppercase tracking-widest">Conectar Serviço</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nome da Integração</label>
+                  <input 
+                    className="w-full bg-black/40 border border-border-dark rounded-xl py-4 px-4 text-slate-200 placeholder:text-slate-600 transition-all focus:border-primary/60 outline-none" 
+                    placeholder="Ex: Slack Security" 
+                    type="text" 
+                    value={integrationForm.name}
+                    onChange={(e) => setIntegrationForm({ ...integrationForm, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Tipo de Serviço</label>
+                  <select 
+                    className="w-full bg-black/40 border border-border-dark rounded-xl py-4 px-4 text-slate-200 transition-all focus:border-primary/60 outline-none appearance-none"
+                    value={integrationForm.type}
+                    onChange={(e) => setIntegrationForm({ ...integrationForm, type: e.target.value })}
+                  >
+                    <option value="github">GitHub</option>
+                    <option value="database">Redis / Database</option>
+                    <option value="webhook">Webhook</option>
+                    <option value="slack">Slack</option>
+                    <option value="terminal">Custom API</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Status Inicial</label>
+                  <input 
+                    className="w-full bg-black/40 border border-border-dark rounded-xl py-4 px-4 text-slate-200 placeholder:text-slate-600 transition-all focus:border-primary/60 outline-none" 
+                    placeholder="Ex: Conectado" 
+                    type="text" 
+                    value={integrationForm.status}
+                    onChange={(e) => setIntegrationForm({ ...integrationForm, status: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col w-full gap-3 mt-2">
+                <button 
+                  onClick={handleSaveIntegration}
+                  className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(19,91,236,0.4)] cursor-pointer"
+                >
+                  Adicionar Integração
+                </button>
+                <button 
+                  onClick={() => setIsIntegrationModalOpen(false)}
+                  className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Integration Modal */}
+      <AnimatePresence>
+        {isEditIntegrationModalOpen && editingIntegration && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background-dark/90 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#0f172a] border border-white/10 shadow-[0_0_50px_rgba(19,91,236,0.2)] w-full max-w-md rounded-3xl overflow-hidden p-8 flex flex-col gap-6"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                  <Edit2 className="size-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Editar Integração</h2>
+                  <p className="text-xs text-slate-400 uppercase tracking-widest">Configurações</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nome da Integração</label>
+                  <input 
+                    className="w-full bg-black/40 border border-border-dark rounded-xl py-4 px-4 text-slate-200 placeholder:text-slate-600 transition-all focus:border-primary/60 outline-none" 
+                    type="text" 
+                    value={editingIntegration.name}
+                    onChange={(e) => setEditingIntegration({ ...editingIntegration, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Status</label>
+                  <input 
+                    className="w-full bg-black/40 border border-border-dark rounded-xl py-4 px-4 text-slate-200 placeholder:text-slate-600 transition-all focus:border-primary/60 outline-none" 
+                    type="text" 
+                    value={editingIntegration.status}
+                    onChange={(e) => setEditingIntegration({ ...editingIntegration, status: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col w-full gap-3 mt-2">
+                <button 
+                  onClick={handleUpdateIntegration}
+                  className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(19,91,236,0.4)] cursor-pointer"
+                >
+                  Salvar Alterações
+                </button>
+                <button 
+                  onClick={() => setIsEditIntegrationModalOpen(false)}
+                  className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Integration Delete Confirmation Modal */}
+      <AnimatePresence>
+        {integrationToDelete && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-background-dark/95 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#0f172a] border border-red-500/30 shadow-[0_0_60px_rgba(239,68,68,0.25)] w-full max-w-md rounded-3xl overflow-hidden p-8 flex flex-col items-center text-center gap-6"
+            >
+              <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
+                <Trash2 className="size-10" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <h2 className="text-2xl font-bold text-white">Remover Integração?</h2>
+                <p className="text-slate-400 text-sm">
+                  A conexão com este serviço será interrompida imediatamente. Você poderá reconectar no futuro se desejar.
+                </p>
+              </div>
+              <div className="flex flex-col w-full gap-3 mt-4">
+                <button 
+                  onClick={confirmDeleteIntegration}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)] cursor-pointer"
+                >
+                  Confirmar Remoção
+                </button>
+                <button 
+                  onClick={() => setIntegrationToDelete(null)}
+                  className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
+                >
+                  Manter Integração
                 </button>
               </div>
             </motion.div>

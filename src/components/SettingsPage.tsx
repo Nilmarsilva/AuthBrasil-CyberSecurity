@@ -972,20 +972,6 @@ export default function SettingsPage() {
                 </button>
               </div>
             )}
-
-            {/* 2FA Promo Card - Only visible in Security Tab */}
-            {activeTab === 'security' && (
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-surface-dark-alt border border-primary/20 p-6">
-                <div className="absolute top-0 right-0 p-4 opacity-20">
-                  <Lock className="size-24 text-primary" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2 relative z-10">Segurança da Conta</h3>
-                <p className="text-sm text-slate-300 mb-4 relative z-10">Autenticação de dois fatores (2FA) está desativada. Recomendamos ativar para maior proteção.</p>
-                <button className="relative z-10 w-full bg-white text-primary hover:bg-gray-100 font-bold py-2 px-4 rounded-lg transition-colors text-sm cursor-pointer">
-                  Configurar 2FA
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>

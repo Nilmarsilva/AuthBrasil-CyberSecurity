@@ -55,14 +55,36 @@ interface WebhookData {
   secretKey?: string;
 }
 
+interface ApiKeyData {
+  id: string;
+  name: string;
+  key: string;
+  createdAt: string;
+  lastUsed: string;
+  isVisible: boolean;
+}
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookData | null>(null);
   const [webhookToDelete, setWebhookToDelete] = useState<string | null>(null);
+  const [apiKeyToDelete, setApiKeyToDelete] = useState<string | null>(null);
   const [isTestingWebhook, setIsTestingWebhook] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [newApiKeyName, setNewApiKeyName] = useState('');
+  const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([
+    {
+      id: 'ak_1',
+      name: 'Produção Principal',
+      key: 'ab_live_51MvYI7L2p3n4m5k6j7h8g9f0e1d2c3b4a5z6x7c8v9b0n1m2',
+      createdAt: '12 dias atrás',
+      lastUsed: 'Há 2 horas',
+      isVisible: false
+    }
+  ]);
   const [webhooks, setWebhooks] = useState<WebhookData[]>([
     {
       id: 'wh_8472910',
@@ -156,6 +178,52 @@ export default function SettingsPage() {
       setWebhookToDelete(null);
       setIsEditModalOpen(false);
       alert('Webhook excluído com sucesso!');
+    }
+  };
+
+  const handleCreateApiKey = () => {
+    if (apiKeys.length >= 3) {
+      alert('Limite de chaves atingido para o seu plano (Máx: 3).');
+      return;
+    }
+    const newKey: ApiKeyData = {
+      id: `ak_${Date.now()}`,
+      name: newApiKeyName || 'Nova Chave API',
+      key: `ab_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
+      createdAt: 'Agora',
+      lastUsed: 'Nunca',
+      isVisible: false
+    };
+    setApiKeys([...apiKeys, newKey]);
+    setIsApiKeyModalOpen(false);
+    setNewApiKeyName('');
+    alert('Chave API gerada com sucesso!');
+  };
+
+  const toggleApiKeyVisibility = (id: string) => {
+    setApiKeys(apiKeys.map(k => k.id === id ? { ...k, isVisible: !k.isVisible } : k));
+  };
+
+  const handleDeleteApiKey = (id: string) => {
+    setApiKeyToDelete(id);
+  };
+
+  const confirmDeleteApiKey = () => {
+    if (apiKeyToDelete) {
+      setApiKeys(apiKeys.filter(k => k.id !== apiKeyToDelete));
+      setApiKeyToDelete(null);
+      alert('Chave API excluída com sucesso!');
+    }
+  };
+
+  const handleRotateApiKey = (id: string) => {
+    if (confirm('Deseja rotacionar esta chave? A chave antiga deixará de funcionar imediatamente.')) {
+      setApiKeys(apiKeys.map(k => k.id === id ? {
+        ...k,
+        key: `ab_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
+        createdAt: 'Agora'
+      } : k));
+      alert('Chave rotacionada com sucesso!');
     }
   };
 
@@ -672,40 +740,94 @@ export default function SettingsPage() {
                 {/* Developer Tools Section */}
                 <section className="glass-panel rounded-2xl p-8 shadow-2xl relative overflow-hidden">
                   <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/10 blur-[50px] rounded-full"></div>
-                  <div className="flex items-center gap-3 mb-8">
-                    <Terminal className="text-primary size-6" />
-                    <div className="flex flex-col">
-                      <h2 className="text-xl font-bold text-white">Ferramentas de Desenvolvedor</h2>
-                      <p className="text-sm text-slate-400">Gerencie suas chaves de API para integrações customizadas.</p>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div className="flex items-center gap-3">
+                      <Terminal className="text-primary size-6" />
+                      <div className="flex flex-col">
+                        <h2 className="text-xl font-bold text-white">Ferramentas de Desenvolvedor</h2>
+                        <p className="text-sm text-slate-400">Gerencie suas chaves de API para integrações customizadas.</p>
+                      </div>
                     </div>
+                    <button 
+                      onClick={() => setIsApiKeyModalOpen(true)}
+                      className="bg-primary/20 hover:bg-primary/30 text-primary font-bold py-2.5 px-6 rounded-xl border border-primary/30 transition-all flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      <Plus className="size-5" />
+                      Criar Nova Chave
+                    </button>
                   </div>
-                  <div className="bg-bg-dark/60 border border-white/5 rounded-xl p-6">
-                    <div className="flex flex-col gap-6">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Secret API Key</label>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <input className="w-full p-3 bg-black/40 border border-border-dark rounded-lg text-slate-300 font-mono text-sm tracking-widest pr-12 focus:outline-none" readOnly type="password" value="ab_live_51MvYI7L2p3n4m5k6j7h8g9f0e1d2c3b4a5z6x7c8v9b0n1m2"/>
-                            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white cursor-pointer">
-                              <Eye className="size-5" />
+
+                  <div className="flex flex-col gap-6">
+                    {apiKeys.map((apiKey) => (
+                      <div key={apiKey.id} className="bg-bg-dark/60 border border-white/5 rounded-xl p-6 group hover:border-primary/30 transition-all">
+                        <div className="flex flex-col gap-6">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-center">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{apiKey.name}</label>
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button 
+                                  onClick={() => handleDeleteApiKey(apiKey.id)}
+                                  className="p-1 text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
+                                  title="Excluir Chave"
+                                >
+                                  <Trash2 className="size-4" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
+                                <input 
+                                  className="w-full p-3 bg-black/40 border border-border-dark rounded-lg text-slate-300 font-mono text-sm tracking-widest pr-12 focus:outline-none" 
+                                  readOnly 
+                                  type={apiKey.isVisible ? "text" : "password"} 
+                                  value={apiKey.key}
+                                />
+                                <button 
+                                  onClick={() => toggleApiKeyVisibility(apiKey.id)}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white cursor-pointer"
+                                >
+                                  {apiKey.isVisible ? <X className="size-5" /> : <Eye className="size-5" />}
+                                </button>
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(apiKey.key);
+                                  alert('Chave API copiada!');
+                                }}
+                                className="bg-surface-dark border border-border-dark hover:border-primary/50 text-white px-4 rounded-lg flex items-center justify-center transition-all group cursor-pointer"
+                              >
+                                <Copy className="size-5 group-active:scale-90 transition-transform" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-400">Criada: <strong className="text-slate-300">{apiKey.createdAt}</strong></span>
+                              <span className="text-xs text-slate-400">Último uso: <strong className="text-slate-300">{apiKey.lastUsed}</strong></span>
+                            </div>
+                            <button 
+                              onClick={() => handleRotateApiKey(apiKey.id)}
+                              className="text-xs font-bold text-primary hover:text-blue-400 transition-colors uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 cursor-pointer"
+                            >
+                              <RefreshCw className="size-4" />
+                              Rotacionar
                             </button>
                           </div>
-                          <button className="bg-surface-dark border border-border-dark hover:border-primary/50 text-white px-4 rounded-lg flex items-center justify-center transition-all group cursor-pointer">
-                            <Copy className="size-5 group-active:scale-90 transition-transform" />
-                          </button>
                         </div>
-                        <p className="text-[10px] text-slate-500 italic mt-1">Aviso: Nunca compartilhe sua chave secreta publicamente. Ela concede acesso total à sua infraestrutura.</p>
                       </div>
-                      <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-slate-400">Última rotação: <strong className="text-slate-300">Há 12 dias</strong></span>
-                          <span className="text-xs text-slate-400">Criada por: <strong className="text-slate-300">Carlos Silva</strong></span>
-                        </div>
-                        <button className="text-xs font-bold text-primary hover:text-blue-400 transition-colors uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 cursor-pointer">
-                          <RefreshCw className="size-4" />
-                          Gerar Nova Chave
-                        </button>
+                    ))}
+
+                    {apiKeys.length === 0 && (
+                      <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-xl">
+                        <p className="text-slate-500 text-sm">Nenhuma chave API gerada ainda.</p>
                       </div>
+                    )}
+
+                    <div className="flex items-center gap-2 p-4 bg-primary/5 rounded-xl border border-primary/10">
+                      <Shield className="size-4 text-primary shrink-0" />
+                      <p className="text-[10px] text-slate-400 italic">
+                        Aviso: Suas chaves de API concedem acesso total à sua conta. Nunca as compartilhe ou as inclua em código client-side.
+                      </p>
                     </div>
                   </div>
                 </section>
@@ -1113,6 +1235,104 @@ export default function SettingsPage() {
                   className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
                 >
                   Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Create API Key Modal */}
+      <AnimatePresence>
+        {isApiKeyModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background-dark/90 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#0f172a] border border-white/10 shadow-[0_0_50px_rgba(19,91,236,0.2)] w-full max-w-md rounded-3xl overflow-hidden p-8 flex flex-col gap-6"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                  <Key className="size-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Nova Chave API</h2>
+                  <p className="text-xs text-slate-400 uppercase tracking-widest">Acesso Programático</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nome da Chave</label>
+                <input 
+                  className="w-full bg-black/40 border border-border-dark rounded-xl py-4 px-4 text-slate-200 placeholder:text-slate-600 transition-all focus:border-primary/60 outline-none" 
+                  placeholder="Ex: Integração CI/CD" 
+                  type="text" 
+                  value={newApiKeyName}
+                  onChange={(e) => setNewApiKeyName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Ao criar uma nova chave, você poderá usá-la para autenticar requisições na nossa API REST. Lembre-se de tratá-la como uma senha.
+                </p>
+              </div>
+
+              <div className="flex flex-col w-full gap-3 mt-2">
+                <button 
+                  onClick={handleCreateApiKey}
+                  className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(19,91,236,0.4)] cursor-pointer"
+                >
+                  Gerar Chave
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsApiKeyModalOpen(false);
+                    setNewApiKeyName('');
+                  }}
+                  className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* API Key Delete Confirmation Modal */}
+      <AnimatePresence>
+        {apiKeyToDelete && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-background-dark/95 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#0f172a] border border-red-500/30 shadow-[0_0_60px_rgba(239,68,68,0.25)] w-full max-w-md rounded-3xl overflow-hidden p-8 flex flex-col items-center text-center gap-6"
+            >
+              <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
+                <Trash2 className="size-10" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <h2 className="text-2xl font-bold text-white">Excluir Chave API?</h2>
+                <p className="text-slate-400 text-sm">
+                  Esta ação é irreversível. Qualquer aplicação ou script usando esta chave perderá o acesso imediatamente.
+                </p>
+              </div>
+              <div className="flex flex-col w-full gap-3 mt-4">
+                <button 
+                  onClick={confirmDeleteApiKey}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)] cursor-pointer"
+                >
+                  Confirmar Exclusão
+                </button>
+                <button 
+                  onClick={() => setApiKeyToDelete(null)}
+                  className="w-full py-3 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
+                >
+                  Manter Chave
                 </button>
               </div>
             </motion.div>

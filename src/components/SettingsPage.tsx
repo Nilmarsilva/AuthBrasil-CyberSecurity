@@ -319,21 +319,21 @@ export default function SettingsPage() {
       {/* Decorative Background Element */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
       
-      <div className="mx-auto w-full max-w-[1024px] px-8 py-10 flex flex-col gap-8 z-10">
+      <div className="mx-auto w-full max-w-[1024px] px-4 sm:px-8 py-6 sm:py-10 flex flex-col gap-6 sm:gap-8 z-10">
         {/* Header Section */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-black text-white tracking-tight">Configurações do Sistema</h1>
-          <p className="text-slate-400 text-lg font-light">Gerencie suas preferências de conta, perfil e configurações de segurança.</p>
+          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Configurações do Sistema</h1>
+          <p className="text-sm sm:text-lg text-slate-400 font-light">Gerencie suas preferências de conta, perfil e configurações de segurança.</p>
         </div>
 
         {/* Tabs */}
-        <div className="w-full border-b border-border-dark">
-          <div className="flex gap-8">
+        <div className="w-full border-b border-border-dark overflow-x-auto no-scrollbar">
+          <div className="flex gap-6 sm:gap-8 min-w-max">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 text-sm font-bold transition-colors border-b-2 cursor-pointer relative ${
+                className={`pb-3 text-sm font-bold transition-colors border-b-2 cursor-pointer relative whitespace-nowrap ${
                   activeTab === tab.id 
                     ? 'text-white border-primary' 
                     : 'text-slate-400 border-transparent hover:text-slate-200 hover:border-slate-600'
@@ -424,21 +424,21 @@ export default function SettingsPage() {
                 </section>
 
                 {/* Account Data Section */}
-                <section className="rounded-2xl border border-border-dark bg-surface-dark-alt/40 backdrop-blur-md p-8 shadow-xl">
-                  <div className="flex items-center justify-between">
+                <section className="rounded-2xl border border-border-dark bg-surface-dark-alt/40 backdrop-blur-md p-6 sm:p-8 shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <Fingerprint className="text-primary size-6" />
                       <div className="flex flex-col">
                         <h2 className="text-lg font-bold text-white">Dados da Conta</h2>
-                        <p className="text-sm text-slate-400">Informações de identificação única do seu perfil.</p>
+                        <p className="text-xs sm:text-sm text-slate-400">Informações de identificação única do seu perfil.</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 bg-bg-dark border border-border-dark rounded-xl px-4 py-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-bg-dark border border-border-dark rounded-xl px-4 py-3">
                       <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-slate-500 uppercase">Account ID</span>
                         <span className="text-sm font-mono text-slate-200">AB-8829-••••-4921</span>
                       </div>
-                      <div className="h-8 w-px bg-border-dark mx-2"></div>
+                      <div className="hidden sm:block h-8 w-px bg-border-dark mx-2"></div>
                       <button className="flex items-center gap-2 text-primary hover:text-blue-400 transition-colors text-sm font-bold cursor-pointer">
                         <Copy className="size-4" />
                         Copiar ID

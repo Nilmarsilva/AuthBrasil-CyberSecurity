@@ -14,22 +14,22 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
       <div className="fixed inset-0 z-0 opacity-20 pointer-events-none grid-bg" />
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-bg-dark/80 to-bg-dark pointer-events-none" />
 
-      <header className="relative z-10 flex items-center justify-between px-6 lg:px-20 py-6 border-b border-slate-800/50 backdrop-blur-md sticky top-0">
-        <div className="flex items-center gap-3">
-          <div className="size-8 text-primary flex items-center justify-center">
-            <Shield className="size-8" />
+      <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-20 py-4 sm:py-6 border-b border-slate-800/50 backdrop-blur-md sticky top-0">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="size-6 sm:size-8 text-primary flex items-center justify-center">
+            <Shield className="size-6 sm:size-8" />
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-100 font-display">
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-100 font-display">
             AuthBrasil <span className="text-primary">Security</span>
           </h2>
         </div>
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4 sm:gap-8">
           <nav className="hidden md:flex items-center gap-8">
             <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Início</a>
             <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Soluções</a>
             <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Sobre Nós</a>
           </nav>
-          <div className="h-6 w-px bg-slate-800" />
+          <div className="hidden sm:block h-6 w-px bg-slate-800" />
           <button 
             onClick={onSwitchToLogin}
             className="text-sm font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
@@ -39,20 +39,20 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-xl"
         >
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-extrabold text-white tracking-tight mb-3 font-display">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3 font-display">
               Crie sua Identidade Segura
             </h1>
-            <p className="text-slate-400 text-lg">Inicie sua jornada na segurança de elite digital.</p>
+            <p className="text-slate-400 text-base sm:text-lg">Inicie sua jornada na segurança de elite digital.</p>
           </div>
 
-          <div className="glass rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="glass rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute -top-24 -right-24 size-48 bg-primary/20 blur-[100px]" />
             <div className="absolute -bottom-24 -left-24 size-48 bg-primary/10 blur-[100px]" />
 
@@ -141,15 +141,17 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
         </motion.div>
       </main>
 
-      <footer className="relative z-10 py-8 px-6 lg:px-20 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
-        <div className="flex items-center gap-6">
+      <footer className="relative z-10 py-6 sm:py-8 px-4 sm:px-6 lg:px-20 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] sm:text-xs text-slate-600">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-center sm:text-left">
           <span>© 2024 AuthBrasil Security Solutions.</span>
-          <a href="#" className="hover:text-slate-400">Termos de Uso</a>
-          <a href="#" className="hover:text-slate-400">Política de Privacidade</a>
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-slate-400">Termos</a>
+            <a href="#" className="hover:text-slate-400">Privacidade</a>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="size-2 bg-emerald-500 rounded-full animate-pulse" />
-          <span>Sistemas Operacionais: Status OK</span>
+          <span>Sistemas: Status OK</span>
         </div>
       </footer>
     </div>

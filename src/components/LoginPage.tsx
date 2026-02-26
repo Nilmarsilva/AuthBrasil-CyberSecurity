@@ -68,25 +68,31 @@ export default function LoginPage({ onSwitchToRegister, onLogin }: LoginPageProp
       </div>
 
       {/* Right Side: Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12 relative">
         <div className="absolute inset-0 lg:hidden opacity-10 grid-bg" />
         
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full max-w-[480px] glass rounded-xl p-8 shadow-2xl relative z-10"
+          className="w-full max-w-[480px] glass rounded-2xl p-6 sm:p-10 shadow-2xl relative z-10"
         >
-          <div className="flex flex-col gap-2 mb-10 text-left">
-            <div className="lg:hidden mb-4">
-              <Shield className="text-primary size-10" />
+          <div className="flex flex-col gap-2 mb-8 sm:mb-10 text-left">
+            <div className="lg:hidden mb-6 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                <Shield className="text-primary size-8" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white leading-none font-display">AuthBrasil</h1>
+                <p className="text-[10px] text-primary uppercase tracking-widest mt-1">Security Cloud</p>
+              </div>
             </div>
-            <h2 className="text-white text-3xl font-bold leading-tight font-display">Autenticação</h2>
-            <p className="text-slate-400 text-sm">Entre na sua conta AuthBrasil para continuar.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold leading-tight font-display text-white">Autenticação</h2>
+            <p className="text-slate-400 text-sm sm:text-base">Entre na sua conta AuthBrasil para continuar.</p>
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4 sm:gap-5">
             {/* Social Login */}
-            <div className="grid grid-cols-2 gap-4 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-2">
               <button className="flex items-center justify-center gap-3 h-12 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-slate-200 text-sm font-medium transition-all cursor-pointer">
                 <Github className="size-5" />
                 GitHub

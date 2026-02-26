@@ -148,15 +148,15 @@ export default function VulnerabilitiesPage({ onNavigate }: VulnerabilitiesPageP
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative font-noto">
       {/* Header */}
-      <header className="relative z-10 h-16 border-b border-slate-800/50 flex items-center justify-between px-8 bg-bg-vulnerability/50 backdrop-blur-md">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight font-space">Base de Conhecimento de Segurança</h2>
-          <p className="text-xs text-text-muted">Biblioteca de testes e critérios de pontuação</p>
+      <header className="relative z-10 h-auto min-h-[4rem] border-b border-slate-800/50 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4 sm:py-0 bg-bg-vulnerability/50 backdrop-blur-md gap-4">
+        <div className="text-center sm:text-left">
+          <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight font-space">Base de Conhecimento</h2>
+          <p className="text-[10px] sm:text-xs text-text-muted">Biblioteca de testes e critérios de pontuação</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="w-full sm:w-auto flex items-center justify-center sm:justify-end gap-4">
           <button 
             onClick={() => onNavigate?.('overview')}
-            className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
           >
             <ShieldAlert className="size-5 group-hover:animate-pulse" />
             <span className="text-sm font-bold tracking-wide">Nova Varredura</span>
@@ -165,21 +165,21 @@ export default function VulnerabilitiesPage({ onNavigate }: VulnerabilitiesPageP
       </header>
 
       {/* Content Scroll Area */}
-      <div className="relative z-10 flex-1 overflow-y-auto p-8">
-        <div className="max-w-7xl mx-auto flex flex-col gap-8">
+      <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-8">
+        <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
           {/* Intro Section */}
-          <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-2">
+          <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-6 mb-2">
             <div className="max-w-2xl">
-              <p className="text-text-muted text-base leading-relaxed">
+              <p className="text-text-muted text-sm sm:text-base leading-relaxed">
                 Entenda cada verificação realizada pelo nosso motor de segurança. Cada teste impacta diretamente sua pontuação de segurança (Score) e ajuda a prevenir vetores de ataque comuns.
               </p>
             </div>
             {/* Filters */}
             <div className="flex gap-2 flex-wrap">
-              <button className="px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold border border-primary/50 shadow-glow-sm cursor-pointer">Todos</button>
-              <button className="px-4 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-700 text-text-muted hover:text-white border border-slate-700 hover:border-slate-600 transition-all text-xs font-medium backdrop-blur-sm cursor-pointer">Rede</button>
-              <button className="px-4 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-700 text-text-muted hover:text-white border border-slate-700 hover:border-slate-600 transition-all text-xs font-medium backdrop-blur-sm cursor-pointer">Aplicação</button>
-              <button className="px-4 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-700 text-text-muted hover:text-white border border-slate-700 hover:border-slate-600 transition-all text-xs font-medium backdrop-blur-sm cursor-pointer">Configuração</button>
+              <button className="px-4 py-1.5 rounded-full bg-primary text-white text-[10px] sm:text-xs font-semibold border border-primary/50 shadow-glow-sm cursor-pointer">Todos</button>
+              <button className="px-4 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-700 text-text-muted hover:text-white border border-slate-700 hover:border-slate-600 transition-all text-[10px] sm:text-xs font-medium backdrop-blur-sm cursor-pointer">Rede</button>
+              <button className="px-4 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-700 text-text-muted hover:text-white border border-slate-700 hover:border-slate-600 transition-all text-[10px] sm:text-xs font-medium backdrop-blur-sm cursor-pointer">Aplicação</button>
+              <button className="px-4 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-700 text-text-muted hover:text-white border border-slate-700 hover:border-slate-600 transition-all text-[10px] sm:text-xs font-medium backdrop-blur-sm cursor-pointer">Configuração</button>
             </div>
           </div>
 

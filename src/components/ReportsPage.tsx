@@ -65,16 +65,16 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
       {/* Content Container */}
       <div className="relative z-10 flex flex-col h-full w-full max-w-[1440px] mx-auto">
         {/* Header Section */}
-        <header className="flex items-start justify-between p-8 pb-4 shrink-0">
+        <header className="flex flex-col sm:flex-row items-start justify-between p-4 sm:p-8 pb-4 shrink-0 gap-4">
           <div className="flex flex-col gap-2">
-            <h2 className="text-3xl font-bold text-white tracking-tight">Histórico de Relatórios</h2>
-            <p className="text-slate-400 text-sm max-w-2xl">
-              Gerencie o histórico completo de análises de vulnerabilidade, auditorias de código e conformidade de segurança.
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Histórico de Relatórios</h2>
+            <p className="text-slate-400 text-xs sm:text-sm max-w-2xl">
+              Gerencie o histórico completo de análises de vulnerabilidade e auditorias.
             </p>
           </div>
           <button 
             onClick={() => onNavigate?.('overview')}
-            className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
           >
             <ShieldAlert className="size-5 group-hover:animate-pulse" />
             <span className="text-sm font-bold tracking-wide">Nova Varredura</span>
@@ -82,58 +82,60 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
         </header>
 
         {/* Filters & Stats Row */}
-        <div className="px-8 py-4 flex flex-wrap gap-4 items-center justify-between shrink-0">
+        <div className="px-4 sm:px-8 py-4 flex flex-col lg:flex-row gap-4 items-center justify-between shrink-0">
           {/* Status Filter Tabs */}
-          <div className="flex p-1 bg-surface-dark/80 backdrop-blur-md rounded-lg border border-surface-border">
-            <button 
-              onClick={() => setActiveFilter('all')}
-              className={`px-4 py-1.5 rounded text-xs font-semibold transition-all cursor-pointer ${
-                activeFilter === 'all' 
-                  ? 'text-white bg-primary/20 border border-primary/30 shadow-sm' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              Todos
-            </button>
-            <button 
-              onClick={() => setActiveFilter('critical')}
-              className={`px-4 py-1.5 rounded text-xs font-semibold transition-all cursor-pointer ${
-                activeFilter === 'critical' 
-                  ? 'text-white bg-status-danger/20 border border-status-danger/30 shadow-sm' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              Críticos
-            </button>
-            <button 
-              onClick={() => setActiveFilter('medium')}
-              className={`px-4 py-1.5 rounded text-xs font-semibold transition-all cursor-pointer ${
-                activeFilter === 'medium' 
-                  ? 'text-white bg-status-warning/20 border border-status-warning/30 shadow-sm' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              Médio Risco
-            </button>
-            <button 
-              onClick={() => setActiveFilter('safe')}
-              className={`px-4 py-1.5 rounded text-xs font-semibold transition-all cursor-pointer ${
-                activeFilter === 'safe' 
-                  ? 'text-white bg-status-success/20 border border-status-success/30 shadow-sm' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              Seguros
-            </button>
+          <div className="w-full lg:w-auto flex p-1 bg-surface-dark/80 backdrop-blur-md rounded-lg border border-surface-border overflow-x-auto no-scrollbar">
+            <div className="flex min-w-max">
+              <button 
+                onClick={() => setActiveFilter('all')}
+                className={`px-4 py-1.5 rounded text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'all' 
+                    ? 'text-white bg-primary/20 border border-primary/30 shadow-sm' 
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Todos
+              </button>
+              <button 
+                onClick={() => setActiveFilter('critical')}
+                className={`px-4 py-1.5 rounded text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'critical' 
+                    ? 'text-white bg-status-danger/20 border border-status-danger/30 shadow-sm' 
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Críticos
+              </button>
+              <button 
+                onClick={() => setActiveFilter('medium')}
+                className={`px-4 py-1.5 rounded text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'medium' 
+                    ? 'text-white bg-status-warning/20 border border-status-warning/30 shadow-sm' 
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Médio Risco
+              </button>
+              <button 
+                onClick={() => setActiveFilter('safe')}
+                className={`px-4 py-1.5 rounded text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'safe' 
+                    ? 'text-white bg-status-success/20 border border-status-success/30 shadow-sm' 
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                Seguros
+              </button>
+            </div>
           </div>
           
           {/* Search */}
-          <div className="relative group">
+          <div className="w-full lg:w-auto relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="size-4 text-slate-500 group-focus-within:text-primary transition-colors" />
             </div>
             <input 
-              className="block w-64 pl-10 pr-3 py-2 border border-surface-border rounded-lg leading-5 bg-surface-dark/50 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-surface-dark focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm transition-all" 
+              className="block w-full lg:w-64 pl-10 pr-3 py-2 border border-surface-border rounded-lg leading-5 bg-surface-dark/50 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-surface-dark focus:border-primary focus:ring-1 focus:ring-primary text-xs sm:text-sm transition-all" 
               placeholder="Buscar domínio ou repositório..." 
               type="text"
               value={searchQuery}
@@ -143,10 +145,10 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
         </div>
 
         {/* Table Container */}
-        <div className="flex-1 px-8 pb-8 overflow-hidden">
+        <div className="flex-1 px-4 sm:px-8 pb-8 overflow-hidden">
           <div className="h-full flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-white/5 border-b border-white/10 text-xs font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10">
+            {/* Desktop Table Header */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-white/5 border-b border-white/10 text-[10px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10">
               <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-primary">
                 DATA/HORA
                 <ChevronDown className="size-3" />
@@ -161,50 +163,63 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
             <div className="flex-1 overflow-y-auto">
               {filteredReports.length > 0 ? (
                 filteredReports.slice(0, itemsPerPage === 'all' ? filteredReports.length : itemsPerPage).map((report, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-surface-border hover:bg-white/5 transition-colors items-center group">
-                    <div className="col-span-2 flex flex-col justify-center">
+                  <div key={index} className="flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-surface-border hover:bg-white/5 transition-colors items-center group">
+                    {/* Date/Time */}
+                    <div className="w-full md:col-span-2 flex md:flex-col justify-between md:justify-center items-center md:items-start">
                       <span className="text-sm font-medium text-slate-200">{report.date}</span>
                       <span className="text-xs text-slate-500">{report.time}</span>
                     </div>
-                    <div className="col-span-3 flex items-center gap-3">
-                      <div className="p-2 rounded bg-surface-dark border border-surface-border">
+                    
+                    {/* Domain/Repo */}
+                    <div className="w-full md:col-span-3 flex items-center gap-3">
+                      <div className="p-2 rounded bg-surface-dark border border-surface-border shrink-0">
                         {getIcon(report.type)}
                       </div>
-                      <span className="text-sm font-semibold text-white tracking-wide">{report.target}</span>
+                      <span className="text-sm font-semibold text-white tracking-wide truncate">{report.target}</span>
                     </div>
-                    <div className="col-span-2 flex justify-center">
-                      <div className={`px-3 py-1 rounded-full border text-xs font-bold flex items-center gap-1 ${getStatusStyles(report.status)}`}>
+
+                    {/* Score */}
+                    <div className="w-full md:col-span-2 flex md:justify-center items-center justify-between">
+                      <span className="md:hidden text-xs text-slate-500 font-bold uppercase">Score:</span>
+                      <div className={`px-3 py-1 rounded-full border text-[10px] font-bold flex items-center gap-1 ${getStatusStyles(report.status)}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${report.status === 'danger' ? 'bg-status-danger animate-pulse' : report.status === 'success' ? 'bg-status-success' : report.status === 'warning' ? 'bg-status-warning' : 'bg-blue-400'}`}></span>
                         {report.score}
                       </div>
                     </div>
-                    <div className="col-span-3 flex flex-col justify-center">
-                      {report.status === 'danger' ? (
-                        <div className="flex items-center gap-2 text-status-danger font-medium text-xs">
-                          <AlertCircle className="size-3" />
-                          {report.issues.split(',')[0]}
-                        </div>
-                      ) : report.status === 'warning' ? (
-                        <span className="text-xs text-status-warning font-medium">{report.issues.split(',')[0]}</span>
-                      ) : (
-                        <span className="text-xs text-slate-400">{report.issues.split(',')[0]}</span>
-                      )}
-                      <span className="text-xs text-slate-500 pl-5">{report.issues.split(',')[1]}</span>
+
+                    {/* Issues */}
+                    <div className="w-full md:col-span-3 flex flex-col justify-center">
+                      <div className="flex items-center justify-between md:justify-start gap-2">
+                        <span className="md:hidden text-xs text-slate-500 font-bold uppercase">Problemas:</span>
+                        {report.status === 'danger' ? (
+                          <div className="flex items-center gap-2 text-status-danger font-medium text-xs">
+                            <AlertCircle className="size-3" />
+                            {report.issues.split(',')[0]}
+                          </div>
+                        ) : report.status === 'warning' ? (
+                          <span className="text-xs text-status-warning font-medium">{report.issues.split(',')[0]}</span>
+                        ) : (
+                          <span className="text-xs text-slate-400">{report.issues.split(',')[0]}</span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-500 md:pl-5 text-right md:text-left">{report.issues.split(',')[1]}</span>
                     </div>
-                    <div className="col-span-2 flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+
+                    {/* Actions */}
+                    <div className="w-full md:col-span-2 flex justify-end gap-4 md:gap-2 md:opacity-60 group-hover:opacity-100 transition-opacity pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
                       <button 
                         onClick={() => onNavigate?.('analyses', report.target)}
-                        className="p-1.5 rounded hover:bg-primary/20 hover:text-primary text-slate-400 transition-colors cursor-pointer" 
-                        title="Visualizar"
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent hover:bg-primary/20 hover:text-primary text-slate-400 transition-colors cursor-pointer" 
                       >
                         <Eye className="size-5" />
+                        <span className="md:hidden text-xs font-bold">Ver</span>
                       </button>
                       <button 
                         onClick={() => alert(`Iniciando download do relatório: ${report.target}`)}
-                        className="p-1.5 rounded hover:bg-white/10 text-slate-400 transition-colors cursor-pointer" 
-                        title="Baixar PDF"
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent hover:bg-white/10 text-slate-400 transition-colors cursor-pointer" 
                       >
                         <Download className="size-5" />
+                        <span className="md:hidden text-xs font-bold">PDF</span>
                       </button>
                     </div>
                   </div>
@@ -219,12 +234,12 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
             </div>
 
             {/* Footer Actions (Pagination/Limit) */}
-            <div className="px-6 py-4 bg-surface-dark/90 border-t border-white/10 flex items-center justify-between shrink-0">
-              <div className="text-xs text-slate-400">
+            <div className="px-4 sm:px-6 py-4 bg-surface-dark/90 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
+              <div className="text-[10px] sm:text-xs text-slate-400">
                 Mostrando {itemsPerPage === 'all' ? filteredReports.length : Math.min(itemsPerPage, filteredReports.length)} de {reports.length} relatórios
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mr-2">Exibir:</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mr-2">Exibir:</span>
                 <div className="flex p-1 bg-bg-dark rounded-lg border border-white/5">
                   {[5, 10, 20, 'all'].map((limit) => (
                     <button

@@ -24,12 +24,12 @@ export default function PlansPage() {
   };
 
   return (
-    <div className="flex-grow overflow-y-auto px-8 py-10 max-w-7xl mx-auto font-space min-h-full">
+    <div className="flex-grow overflow-y-auto px-4 sm:px-8 py-6 sm:py-10 max-w-7xl mx-auto font-space min-h-full">
       {/* Header Section */}
-      <header className="mb-12">
+      <header className="mb-8 sm:mb-12">
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Planos e Assinatura</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-lg">Escolha seu nível de proteção e garanta a segurança absoluta dos seus ativos digitais.</p>
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">Planos e Assinatura</h1>
+          <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400">Escolha seu nível de proteção e garanta a segurança absoluta dos seus ativos digitais.</p>
         </div>
       </header>
 
@@ -182,7 +182,8 @@ export default function PlansPage() {
             <button className="text-primary text-sm font-bold hover:underline cursor-pointer">Ver todas</button>
           </div>
           <div className="glass-card rounded-2xl overflow-hidden border-slate-800">
-            <table className="w-full text-left text-sm">
+            {/* Desktop Table */}
+            <table className="hidden sm:table w-full text-left text-sm">
               <thead className="bg-slate-900/50 text-slate-400 font-bold uppercase text-[10px] tracking-widest border-b border-slate-800">
                 <tr>
                   <th className="px-6 py-4">Data</th>
@@ -212,6 +213,28 @@ export default function PlansPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Mobile List */}
+            <div className="sm:hidden divide-y divide-slate-800">
+              {invoices.map((invoice, i) => (
+                <div key={i} className="p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-slate-300">{invoice.date}</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter ${
+                      invoice.statusType === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
+                    }`}>
+                      {invoice.status}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-300">{invoice.amount}</span>
+                    <button className="text-slate-500 hover:text-white transition-colors cursor-pointer">
+                      {invoice.statusType === 'success' ? <Download className="size-4" /> : <AlertTriangle className="size-4" />}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <p className="text-[10px] text-slate-500 italic px-2">Nota: Os recibos detalhados podem ser acessados diretamente no portal do cliente Stripe.</p>
         </section>

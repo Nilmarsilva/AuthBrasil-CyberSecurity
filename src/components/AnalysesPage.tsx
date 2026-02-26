@@ -143,46 +143,50 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="h-20 border-b border-white/5 flex items-center px-8 sticky top-0 bg-[#050810]/80 backdrop-blur-md z-10">
-        <div className="flex-1 flex items-center gap-4">
+      <header className="h-auto min-h-[5rem] border-b border-white/5 flex flex-col sm:flex-row items-center px-4 sm:px-8 py-4 sm:py-0 sticky top-0 bg-[#050810]/80 backdrop-blur-md z-50 gap-4">
+        <div className="w-full sm:flex-1 flex items-center gap-4">
           <div className="relative flex-1 max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 size-5" />
             <input 
               type="text" 
-              placeholder="Cole uma URL ou repositório para nova varredura..."
+              placeholder="Cole uma URL ou repositório..."
               value={scanTarget}
               onChange={(e) => setScanTarget(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-32 py-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-500"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 sm:pr-32 py-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-500"
             />
             <button 
               onClick={handleStartScan}
               disabled={isScanning || !scanTarget}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2"
+              className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer items-center gap-2"
             >
               {isScanning ? <Loader2 className="size-3 animate-spin" /> : null}
               {isScanning ? 'SCANNEANDO...' : 'INICIAR SCAN'}
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-2">
-            <div className="w-8 h-8 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center">
-              <CheckCircle2 className="size-4 text-green-500" />
-            </div>
-          </div>
+        <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-4">
+          <button 
+            onClick={handleStartScan}
+            disabled={isScanning || !scanTarget}
+            className="sm:hidden flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white text-[10px] font-bold px-4 py-3 rounded-xl transition-all cursor-pointer items-center justify-center gap-2"
+          >
+            {isScanning ? <Loader2 className="size-3 animate-spin" /> : null}
+            {isScanning ? 'SCANNEANDO...' : 'INICIAR SCAN'}
+          </button>
           <button 
             onClick={handleExportPDF}
-            className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all cursor-pointer"
+            className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-3 sm:py-2 rounded-xl sm:rounded-lg flex items-center gap-2 text-[10px] font-bold transition-all cursor-pointer"
           >
             <FileDown className="size-4 text-blue-400" />
-            EXPORTAR PDF
+            <span className="hidden xs:inline">EXPORTAR PDF</span>
+            <span className="xs:hidden">PDF</span>
           </button>
         </div>
       </header>
 
-      <div className="p-8 space-y-8">
-        <section className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-4 glass-card p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden neon-border-blue">
+      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-4 glass-card p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden neon-border-blue">
             <div className="absolute top-0 right-0 p-4">
               <Info className="size-5 text-slate-600" />
             </div>
@@ -198,65 +202,65 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
             </div>
           </div>
 
-          <div className="col-span-12 lg:col-span-8 grid grid-cols-2 gap-4">
-            <div className="glass-card p-5 rounded-2xl border-l-4 border-l-success-neon">
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="glass-card p-4 sm:p-5 rounded-2xl border-l-4 border-l-success-neon">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">SSL/HTTPS Status</p>
-                  <h3 className="text-lg font-bold text-white mt-1">Certificado Ativo</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">SSL/HTTPS Status</p>
+                  <h3 className="text-base sm:text-lg font-bold text-white mt-1">Certificado Ativo</h3>
                 </div>
                 <ShieldCheck className="text-success-neon size-5" />
               </div>
-              <p className="text-xs text-slate-500 mt-3">Expira em 142 dias (Let's Encrypt)</p>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-3">Expira em 142 dias (Let's Encrypt)</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl border-l-4 border-l-critical-neon">
+            <div className="glass-card p-4 sm:p-5 rounded-2xl border-l-4 border-l-critical-neon">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Portas Abertas</p>
-                  <h3 className="text-lg font-bold text-white mt-1">08 Detectadas</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Portas Abertas</p>
+                  <h3 className="text-base sm:text-lg font-bold text-white mt-1">08 Detectadas</h3>
                 </div>
                 <Router className="text-critical-neon size-5" />
               </div>
-              <p className="text-xs text-critical-neon mt-3 font-medium">Risco: MySQL (3306) exposta publicamente</p>
+              <p className="text-[10px] sm:text-xs text-critical-neon mt-3 font-medium">Risco: MySQL (3306) exposta</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl border-l-4 border-l-warning-neon">
+            <div className="glass-card p-4 sm:p-5 rounded-2xl border-l-4 border-l-warning-neon">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">CMS & Tech Stack</p>
-                  <h3 className="text-lg font-bold text-white mt-1">FastAPI / Nginx</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">CMS & Tech Stack</p>
+                  <h3 className="text-base sm:text-lg font-bold text-white mt-1">FastAPI / Nginx</h3>
                 </div>
                 <Server className="text-warning-neon size-5" />
               </div>
-              <p className="text-xs text-slate-500 mt-3">Versão 0.95.0 - Atualização disponível</p>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-3">Versão 0.95.0 - Atualização disponível</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl border-l-4 border-l-primary-neon">
+            <div className="glass-card p-4 sm:p-5 rounded-2xl border-l-4 border-l-primary-neon">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Última Varredura</p>
-                  <h3 className="text-lg font-bold text-white mt-1">Há 2 horas</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Última Varredura</p>
+                  <h3 className="text-base sm:text-lg font-bold text-white mt-1">Há 2 horas</h3>
                 </div>
                 <History className="text-primary-neon size-5" />
               </div>
-              <p className="text-xs text-slate-500 mt-3">Duração total: 4min 12s</p>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-3">Duração total: 4min 12s</p>
             </div>
           </div>
         </section>
 
         <section>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 Problemas de Segurança 
-                <span className="bg-red-500/20 text-red-500 text-xs px-2 py-0.5 rounded-full border border-red-500/30">
+                <span className="bg-red-500/20 text-red-500 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">
                   {vulnerabilities.filter(v => v.status === 'Pendente').length} ativos
                 </span>
               </h2>
-              <p className="text-sm text-slate-500">Lista detalhada de vulnerabilidades encontradas no domínio principal.</p>
+              <p className="text-xs sm:text-sm text-slate-500">Lista detalhada de vulnerabilidades encontradas.</p>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => setActiveFilter('all')}
-                className={`px-4 py-2 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                   activeFilter === 'all' 
                     ? 'bg-white/10 border-white/20 text-white' 
                     : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
@@ -266,7 +270,7 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
               </button>
               <button 
                 onClick={() => setActiveFilter('critical')}
-                className={`px-4 py-2 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                   activeFilter === 'critical' 
                     ? 'bg-red-500/20 border-red-500/30 text-red-500' 
                     : 'bg-red-500/5 border-red-500/10 text-red-500/60 hover:bg-red-500/10'
@@ -278,7 +282,8 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
           </div>
 
           <div className="glass-card rounded-2xl overflow-hidden border border-white/5">
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-white/5 border-b border-white/5 uppercase">
+            {/* Desktop Table Header */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-white/5 border-b border-white/5 uppercase">
               <div className="col-span-2 text-[10px] font-bold text-slate-500 tracking-widest">SEVERIDADE</div>
               <div className="col-span-5 text-[10px] font-bold text-slate-500 tracking-widest">IDENTIFICADOR / VULNERABILIDADE</div>
               <div className="col-span-2 text-[10px] font-bold text-slate-500 tracking-widest text-center">PONTOS PERDIDOS</div>
@@ -288,9 +293,10 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
             <div className="divide-y divide-white/5">
               {filteredVulnerabilities.map((vuln) => (
                 <div key={vuln.id} className={`${expandedId === vuln.id ? 'bg-red-500/5' : ''}`}>
+                  {/* Desktop Row */}
                   <div 
                     onClick={() => setExpandedId(expandedId === vuln.id ? null : vuln.id)}
-                    className="grid grid-cols-12 gap-4 px-6 py-5 items-center hover:bg-white/5 transition-colors cursor-pointer group"
+                    className="hidden md:grid grid-cols-12 gap-4 px-6 py-5 items-center hover:bg-white/5 transition-colors cursor-pointer group"
                   >
                     <div className="col-span-2">
                       <span className={`px-3 py-1 rounded-md text-[10px] font-black border uppercase tracking-wider ${getSeverityColor(vuln.severity)}`}>
@@ -314,6 +320,34 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
                     </div>
                     <div className="col-span-1 text-right">
                       <ArrowDownCircle className={`text-slate-400 size-5 transition-transform duration-300 ${expandedId === vuln.id ? 'rotate-0' : '-rotate-90'}`} />
+                    </div>
+                  </div>
+
+                  {/* Mobile Card */}
+                  <div 
+                    onClick={() => setExpandedId(expandedId === vuln.id ? null : vuln.id)}
+                    className="md:hidden p-4 flex flex-col gap-3 hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-black border uppercase tracking-wider ${getSeverityColor(vuln.severity)}`}>
+                        {vuln.severity}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(vuln.status)}
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${getStatusTextColor(vuln.status)}`}>
+                          {vuln.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-white">{vuln.title}</h4>
+                      <p className="text-[10px] text-slate-400 mt-1">{vuln.description}</p>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                      <span className={`${vuln.severity === 'ALTA' ? 'text-red-500' : vuln.severity === 'MÉDIA' ? 'text-amber-500' : 'text-green-500'} font-black text-base`}>
+                        - {vuln.points} pts
+                      </span>
+                      <ArrowDownCircle className={`text-slate-400 size-4 transition-transform duration-300 ${expandedId === vuln.id ? 'rotate-0' : '-rotate-90'}`} />
                     </div>
                   </div>
                   
@@ -365,20 +399,20 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
           </div>
         </section>
 
-        <section className="glass-card p-10 rounded-[32px] flex items-center justify-between neon-border-blue relative overflow-hidden group">
+        <section className="glass-card p-6 sm:p-10 rounded-[24px] sm:rounded-[32px] flex flex-col lg:flex-row items-center justify-between neon-border-blue relative overflow-hidden group gap-6">
           <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="flex items-center gap-6 relative z-10">
-            <div className="bg-blue-600/20 p-5 rounded-2xl border border-blue-500/30">
-              <BrainCircuit className="text-blue-500 size-10" />
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 relative z-10 text-center sm:text-left">
+            <div className="bg-blue-600/20 p-4 sm:p-5 rounded-2xl border border-blue-500/30">
+              <BrainCircuit className="text-blue-500 size-8 sm:size-10" />
             </div>
             <div>
-              <h3 className="font-bold text-xl text-white tracking-tight">Central de Ajuda & Documentação</h3>
-              <p className="text-slate-400 text-sm mt-1 max-w-md">Aprenda a mitigar os riscos mais comuns e veja exemplos práticos de correção para sua stack tecnológica.</p>
+              <h3 className="font-bold text-lg sm:text-xl text-white tracking-tight">Central de Ajuda & Documentação</h3>
+              <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md">Aprenda a mitigar os riscos mais comuns e veja exemplos práticos de correção para sua stack tecnológica.</p>
             </div>
           </div>
           <button 
             onClick={() => setShowComingSoon(true)}
-            className="px-8 py-4 bg-transparent border border-blue-500/50 text-blue-400 font-bold rounded-xl hover:bg-blue-500 hover:text-white transition-all relative z-10 text-sm cursor-pointer"
+            className="w-full lg:w-auto px-8 py-4 bg-transparent border border-blue-500/50 text-blue-400 font-bold rounded-xl hover:bg-blue-500 hover:text-white transition-all relative z-10 text-sm cursor-pointer"
           >
             ACESSAR DOCUMENTAÇÃO
           </button>

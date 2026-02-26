@@ -11,22 +11,22 @@ import { motion } from 'motion/react';
 
 export default function OverviewPage() {
   return (
-    <div className="max-w-6xl mx-auto p-8 relative z-10">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
       {/* Header & Quick Stats */}
-      <header className="flex justify-between items-start mb-8">
+      <header className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard de Segurança</h2>
-          <p className="text-slate-400 mt-1">Bem-vindo de volta. Seus sistemas estão seguros.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard de Segurança</h2>
+          <p className="text-slate-400 mt-1 text-sm sm:text-base">Bem-vindo de volta. Seus sistemas estão seguros.</p>
         </div>
-        <div className="flex gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+        <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-xs font-bold">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             ÚLTIMO SCAN: OK
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] sm:text-xs font-bold uppercase tracking-wider">
             <Award className="size-4" />
             Assinatura Ativa
           </div>
@@ -35,18 +35,20 @@ export default function OverviewPage() {
 
       {/* Action Bar */}
       <section className="mb-10">
-        <div className="glassmorphism p-1 rounded-2xl flex items-center gap-2 neon-glow-primary">
-          <div className="pl-5 text-slate-500">
-            <LinkIcon className="size-5" />
+        <div className="glassmorphism p-1.5 sm:p-1 rounded-2xl flex flex-col sm:flex-row items-center gap-2 neon-glow-primary">
+          <div className="flex items-center w-full sm:w-auto">
+            <div className="pl-5 text-slate-500">
+              <LinkIcon className="size-5" />
+            </div>
+            <input 
+              type="text" 
+              placeholder="Insira URL ou Repositório"
+              className="flex-1 bg-transparent border-none focus:ring-0 text-slate-100 placeholder:text-slate-500 text-base sm:text-lg py-3 sm:py-4 px-4 sm:px-0 outline-none min-w-0"
+            />
           </div>
-          <input 
-            type="text" 
-            placeholder="Insira URL ou Repositório (ex: https://github.com/org/repo)"
-            className="flex-1 bg-transparent border-none focus:ring-0 text-slate-100 placeholder:text-slate-500 text-lg py-4 outline-none"
-          />
-          <button className="bg-primary hover:bg-blue-600 px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all mr-1 cursor-pointer">
+          <button className="w-full sm:w-auto bg-primary hover:bg-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all sm:mr-1 cursor-pointer">
             <Rocket className="size-5" />
-            Iniciar Nova Análise
+            <span className="whitespace-nowrap">Iniciar Análise</span>
           </button>
         </div>
       </section>

@@ -923,53 +923,55 @@ export default function SettingsPage() {
 
           {/* Right Column: Integrations & Status */}
           <div className="lg:col-span-1 flex flex-col gap-8">
-            {/* Integrations Card */}
-            <div className={`rounded-2xl border border-border-dark bg-surface-dark-alt/50 p-6 flex flex-col gap-4 transition-all duration-300 ${activeTab === 'integrations' ? 'lg:mt-14' : ''}`}>
-              <h3 className="text-lg font-bold text-white mb-2">Integrações Ativas</h3>
-              
-              {integrations.map((integration) => (
-                <div key={integration.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-border-dark hover:border-slate-600 transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-white/5">
-                      <integration.icon className={`size-6 ${integration.iconColor}`} />
+            {/* Integrations Card - Only visible in Integrations Tab */}
+            {activeTab === 'integrations' && (
+              <div className={`rounded-2xl border border-border-dark bg-surface-dark-alt/50 p-6 flex flex-col gap-4 transition-all duration-300 ${activeTab === 'integrations' ? 'lg:mt-14' : ''}`}>
+                <h3 className="text-lg font-bold text-white mb-2">Integrações Ativas</h3>
+                
+                {integrations.map((integration) => (
+                  <div key={integration.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-border-dark hover:border-slate-600 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white/5">
+                        <integration.icon className={`size-6 ${integration.iconColor}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">{integration.name}</p>
+                        <p className="text-xs text-green-400 flex items-center gap-1">
+                          <span className={`w-1.5 h-1.5 rounded-full ${integration.status.toLowerCase().includes('conectado') || integration.status.toLowerCase().includes('online') ? 'bg-green-400' : 'bg-slate-500'}`}></span> {integration.status}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-white">{integration.name}</p>
-                      <p className="text-xs text-green-400 flex items-center gap-1">
-                        <span className={`w-1.5 h-1.5 rounded-full ${integration.status.toLowerCase().includes('conectado') || integration.status.toLowerCase().includes('online') ? 'bg-green-400' : 'bg-slate-500'}`}></span> {integration.status}
-                      </p>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => handleEditIntegration(integration)}
+                        className="p-1.5 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                      >
+                        <Edit2 className="size-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteIntegration(integration.id)}
+                        className="p-1.5 text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => handleEditIntegration(integration)}
-                      className="p-1.5 text-slate-500 hover:text-white transition-colors cursor-pointer"
-                    >
-                      <Edit2 className="size-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteIntegration(integration.id)}
-                      className="p-1.5 text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                ))}
+
+                {integrations.length === 0 && (
+                  <div className="text-center py-6 border border-dashed border-white/5 rounded-xl">
+                    <p className="text-slate-500 text-xs">Nenhuma integração ativa.</p>
                   </div>
-                </div>
-              ))}
+                )}
 
-              {integrations.length === 0 && (
-                <div className="text-center py-6 border border-dashed border-white/5 rounded-xl">
-                  <p className="text-slate-500 text-xs">Nenhuma integração ativa.</p>
-                </div>
-              )}
-
-              <button 
-                onClick={() => setIsIntegrationModalOpen(true)}
-                className="w-full mt-2 py-2 border border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Plus className="size-4" /> Adicionar Integração
-              </button>
-            </div>
+                <button 
+                  onClick={() => setIsIntegrationModalOpen(true)}
+                  className="w-full mt-2 py-2 border border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Plus className="size-4" /> Adicionar Integração
+                </button>
+              </div>
+            )}
 
             {/* 2FA Promo Card - Only visible in Security Tab */}
             {activeTab === 'security' && (

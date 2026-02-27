@@ -28,6 +28,39 @@
   --color-status-danger: #ef4444;
   --color-text-main: #f8fafc;
   --color-text-muted: #94a3b8;
+
+  /* Landing Page Specific Colors */
+  --color-lp-primary: #00f0ff;
+  --color-lp-secondary: #7000ff;
+  --color-lp-bg-dark: #050b14;
+  --color-lp-surface-dark: #0a1322;
+  --color-lp-border-neon: rgba(0, 240, 255, 0.3);
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  @keyframes scan-line {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes scroll {
+    to { transform: translate(calc(-50% - 1rem)); }
+  }
+  @keyframes scan-vertical {
+    0% { top: -20%; }
+    100% { top: 120%; }
+  }
+
+  --animate-pulse-glow: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-scan-line: scan-line 3s linear infinite;
+  --animate-scroll: scroll 30s linear infinite;
+  --animate-scan-vertical: scan-vertical 3s linear infinite;
 }
 
 @layer base {
@@ -143,5 +176,57 @@
   .digital-grid {
     background-image: linear-gradient(rgba(19, 91, 236, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(19, 91, 236, 0.05) 1px, transparent 1px);
     background-size: 30px 30px;
+  }
+
+  .bg-cyber-mesh {
+    background-size: 50px 50px;
+    background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    position: relative;
+  }
+  .bg-cyber-mesh::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 0%, rgba(112, 0, 255, 0.15), transparent 70%);
+    pointer-events: none;
+  }
+  .text-glow {
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  }
+  .border-glow {
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+  }
+  .scroller {
+    mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+  }
+  .scroller__inner {
+    display: flex;
+    gap: 2rem;
+    width: max-content;
+    @apply animate-scroll;
+  }
+  .text-gradient-metallic {
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 20%, #ffffff 50%, #94a3b8 80%, #64748b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-neon {
+    background: linear-gradient(to right, #00f0ff, #7000ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .lp-glass-panel {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 240, 255, 0.1);
   }
 }

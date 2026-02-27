@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
+import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import DashboardPage from './components/DashboardPage';
 
 export default function App() {
-  const [view, setView] = useState<'login' | 'register' | 'dashboard'>('login');
+  const [view, setView] = useState<'landing' | 'login' | 'register' | 'dashboard'>('landing');
 
   return (
     <div className="min-h-screen">
+      {view === 'landing' && (
+        <LandingPage 
+          onStart={() => setView('register')} 
+          onLogin={() => setView('login')} 
+        />
+      )}
       {view === 'login' && (
         <LoginPage 
           onSwitchToRegister={() => setView('register')} 
@@ -21,7 +28,7 @@ export default function App() {
         />
       )}
       {view === 'dashboard' && (
-        <DashboardPage onLogout={() => setView('login')} />
+        <DashboardPage onLogout={() => setView('landing')} />
       )}
     </div>
   );

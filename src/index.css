@@ -55,12 +55,32 @@
     0% { top: -20%; }
     100% { top: 120%; }
   }
+  @keyframes grid-move {
+    0% { backgroundPosition: 0 0; }
+    100% { backgroundPosition: 50px 50px; }
+  }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 
   --animate-pulse-glow: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-scan-line: scan-line 3s linear infinite;
   --animate-scroll: scroll 30s linear infinite;
   --animate-scan-vertical: scan-vertical 3s linear infinite;
+  --animate-grid-move: grid-move 20s linear infinite;
+  --animate-spin-slow: spin-slow 12s linear infinite;
+}
+
+@layer utilities {
+  .grayscale-hover {
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+  .grayscale-hover:hover {
+    filter: grayscale(0%);
+  }
 }
 
 @layer base {
@@ -228,5 +248,25 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(0, 240, 255, 0.1);
+  }
+
+  .step-line {
+    position: absolute;
+    left: 2rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #00f0ff, #7000ff, transparent);
+  }
+
+  .code-snippet {
+    font-family: 'Courier New', Courier, monospace;
+    background: #0f172a;
+    border-left: 2px solid #00f0ff;
+  }
+
+  .pricing-card-glow:hover {
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+    border-color: rgba(0, 240, 255, 0.4);
   }
 }

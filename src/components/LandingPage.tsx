@@ -3,9 +3,12 @@ import React from 'react';
 interface LandingPageProps {
   onStart: () => void;
   onLogin: () => void;
+  onPricing: () => void;
+  onHowItWorks: () => void;
+  onAboutUs: () => void;
 }
 
-export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
+export default function LandingPage({ onStart, onLogin, onPricing, onHowItWorks, onAboutUs }: LandingPageProps) {
   return (
     <div className="font-body antialiased overflow-x-hidden bg-cyber-mesh min-h-screen flex flex-col selection:bg-lp-primary selection:text-primary-content">
       <header className="sticky top-0 z-50 w-full border-b border-lp-border-neon bg-lp-surface-dark/80 backdrop-blur-xl">
@@ -20,9 +23,9 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
             </div>
             <nav className="hidden md:flex items-center gap-8">
               <a className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]" href="#">Recursos</a>
-              <a className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors" href="#">Como Funciona</a>
-              <a className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors" href="#">Preços</a>
-              <a className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors" href="#">Sobre Nós</a>
+              <button onClick={onHowItWorks} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Como Funciona</button>
+              <button onClick={onPricing} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Preços</button>
+              <button onClick={onAboutUs} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Sobre Nós</button>
             </nav>
             <div className="flex items-center gap-3">
               <button 
@@ -59,14 +62,14 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lp-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-lp-primary"></span>
                   </span>
-                  <span className="tracking-wide uppercase">V3.0 Online • Relatórios Instantâneos</span>
+                  <span className="tracking-wide uppercase">Engine V1.0 Online • Auditoria Instantânea</span>
                 </div>
                 <h1 className="font-display text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl mb-6 leading-tight">
-                  <span className="text-gradient-metallic block mb-2">Pague por Teste,</span>
-                  <span className="text-gradient-neon text-glow">Proteja para Sempre</span>
+                  <span className="text-gradient-metallic block mb-2">Segurança Ofensiva</span>
+                  <span className="text-gradient-neon text-glow">Sob Demanda</span>
                 </h1>
                 <p className="mx-auto lg:mx-0 max-w-2xl text-lg text-text-muted mb-10 leading-relaxed font-light">
-                  Segurança automatizada de nível militar. Obtenha um relatório completo de vulnerabilidades (OWASP Top 10) com deep scanning. Sem contratos mensais.
+                  Identifique falhas críticas com scans DAST automatizados de alta precisão. Sem assinaturas ou contratos mensais: valide sua aplicação e pague apenas por cada auditoria realizada.
                 </p>
                 
                 <div className="relative max-w-xl mx-auto lg:mx-0 mb-10 group">
@@ -96,8 +99,8 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
 
                 <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-text-muted">
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
-                    <span className="material-symbols-outlined text-lp-primary" style={{ fontSize: '18px' }}>encrypted</span>
-                    <span>Criptografia AES-256</span>
+                    <span className="material-symbols-outlined text-lp-primary" style={{ fontSize: '18px' }}>verified</span>
+                    <span>Padrão OWASP & CVSS</span>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
                     <span className="material-symbols-outlined text-lp-primary" style={{ fontSize: '18px' }}>bolt</span>
@@ -106,7 +109,7 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
                 </div>
               </div>
 
-              <div className="flex-1 w-full max-w-md lg:max-w-full flex justify-center items-center perspective-1000">
+              <div className="flex-1 w-full max-md:mt-12 lg:max-w-full flex justify-center items-center perspective-1000">
                 <div className="relative w-[380px] h-[480px] animate-float">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-lp-primary/20 rounded-full blur-[80px]"></div>
                   <div className="relative h-full w-full lp-glass-panel rounded-3xl p-8 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden">
@@ -116,59 +119,58 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
                       <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-lp-primary/20 text-lp-primary border border-lp-primary/30">
-                            <span className="material-symbols-outlined">security</span>
+                            <span className="material-symbols-outlined animate-pulse">psychology</span>
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-white font-display">Deep Scan Pro</h3>
-                            <p className="text-xs text-lp-primary font-mono tracking-wider">TARGET LOCKED</p>
+                            <h3 className="text-lg font-bold text-white font-display">NeuralCore™</h3>
+                            <p className="text-xs text-lp-primary font-mono tracking-wider uppercase">Engine Ativa • V1.0</p>
                           </div>
                         </div>
-                        <span className="inline-flex items-center rounded bg-lp-secondary/20 border border-lp-secondary/40 px-2 py-1 text-xs font-medium text-purple-200">
-                          POPULAR
+                        <span className="inline-flex items-center rounded bg-lp-secondary/20 border border-lp-secondary/40 px-2 py-1 text-[10px] font-bold text-purple-200 uppercase">
+                          Proprietary Tech
                         </span>
                       </div>
 
-                      <div className="mb-8">
-                        <div className="flex items-baseline">
-                          <span className="text-5xl font-bold tracking-tight text-white font-display">R$ 499</span>
-                          <span className="ml-2 text-sm font-medium text-text-muted">/ único</span>
+                      <div className="space-y-6 mb-8">
+                        <div className="relative h-28 w-full bg-lp-surface-dark/50 rounded-xl border border-white/5 overflow-hidden flex items-center justify-center">
+                          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#00f0ff_1px,transparent_1px)] [background-size:10px_10px]"></div>
+                          <div className="relative z-10 flex flex-col items-center">
+                            <div className="flex gap-1.5 mb-3">
+                              {[...Array(8)].map((_, i) => (
+                                <div key={i} className="w-1.5 h-6 bg-lp-primary/40 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                              ))}
+                            </div>
+                            <span className="text-[10px] font-mono text-lp-primary/80 uppercase tracking-[0.2em] text-center">Analisando Vetores de Ataque...</span>
+                          </div>
                         </div>
-                        <div className="h-1 w-full bg-gray-800 mt-4 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-lp-primary to-lp-secondary w-3/4 animate-pulse"></div>
-                        </div>
-                        <p className="text-xs text-right text-lp-primary mt-1 font-mono">75% SLOTS FILLED</p>
-                      </div>
 
-                      <ul className="space-y-4 mb-8">
-                        <li className="flex items-start gap-3 group">
-                          <span className="material-symbols-outlined text-lp-primary shrink-0 group-hover:scale-110 transition-transform" style={{ fontSize: '20px' }}>check_circle</span>
-                          <span className="text-sm text-gray-300">Varredura OWASP Top 10</span>
-                        </li>
-                        <li className="flex items-start gap-3 group">
-                          <span className="material-symbols-outlined text-lp-primary shrink-0 group-hover:scale-110 transition-transform" style={{ fontSize: '20px' }}>check_circle</span>
-                          <span className="text-sm text-gray-300">Relatório PDF Técnico + Executivo</span>
-                        </li>
-                        <li className="flex items-start gap-3 group">
-                          <span className="material-symbols-outlined text-lp-primary shrink-0 group-hover:scale-110 transition-transform" style={{ fontSize: '20px' }}>check_circle</span>
-                          <span className="text-sm text-gray-300">Suporte técnico (7 dias)</span>
-                        </li>
-                        <li className="flex items-start gap-3 group">
-                          <span className="material-symbols-outlined text-lp-primary shrink-0 group-hover:scale-110 transition-transform" style={{ fontSize: '20px' }}>check_circle</span>
-                          <span className="text-sm text-gray-300">1x Re-teste gratuito</span>
-                        </li>
-                      </ul>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-lp-primary/30 transition-colors group/item">
+                            <span className="material-symbols-outlined text-lp-primary text-sm mb-1 group-hover/item:scale-110 transition-transform">radar</span>
+                            <p className="text-[10px] text-text-muted uppercase font-bold">Mapeamento</p>
+                            <p className="text-xs text-white font-medium">Full Surface Scan</p>
+                          </div>
+                          <div className="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-lp-secondary/30 transition-colors group/item">
+                            <span className="material-symbols-outlined text-lp-secondary text-sm mb-1 group-hover/item:scale-110 transition-transform">security</span>
+                            <p className="text-[10px] text-text-muted uppercase font-bold">Defesa</p>
+                            <p className="text-xs text-white font-medium">OWASP Top 10</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <button 
-                      onClick={onStart}
+                      onClick={onHowItWorks}
                       className="relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-lp-primary to-lp-secondary p-[1px] group cursor-pointer"
                     >
                       <span className="absolute inset-0 bg-gradient-to-r from-lp-primary to-lp-secondary opacity-50 blur-sm"></span>
                       <div className="relative bg-lp-surface-dark w-full h-full rounded-xl py-3 px-4 flex items-center justify-center gap-2 group-hover:bg-opacity-80 transition-all">
-                        <span className="text-sm font-bold text-white group-hover:text-lp-primary transition-colors">ADQUIRIR SCAN</span>
+                        <span className="text-sm font-bold text-white">CONHECER TECNOLOGIA</span>
                         <span className="material-symbols-outlined text-white text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
                       </div>
                     </button>
+
+                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-lp-primary/10 rounded-full blur-3xl"></div>
                   </div>
                   
                   <div className="absolute -right-8 top-10 p-3 lp-glass-panel rounded-lg border-l-2 border-lp-primary animate-pulse shadow-[0_0_20px_rgba(0,240,255,0.2)]">
@@ -418,7 +420,7 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
             <div>
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Produto</h3>
               <ul className="space-y-3">
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Preços</a></li>
+                <li><button onClick={onPricing} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Preços</button></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Recursos</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Relatório Exemplo</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">API Docs</a></li>
@@ -427,7 +429,7 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
             <div>
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Empresa</h3>
               <ul className="space-y-3">
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Sobre Nós</a></li>
+                <li><button onClick={onAboutUs} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Sobre Nós</button></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Carreiras</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Blog de Segurança</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Contato</a></li>
@@ -443,7 +445,7 @@ export default function LandingPage({ onStart, onLogin }: LandingPageProps) {
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-text-muted text-center md:text-left">© 2023 AuthBrasil CyberSecurity Ltda.</p>
+            <p className="text-xs text-text-muted text-center md:text-left">© 2026 AuthBrasil CyberSecurity Ltda.</p>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-900/20 border border-green-800/50">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               <span className="text-xs text-green-400 font-mono">ALL SYSTEMS OPERATIONAL</span>

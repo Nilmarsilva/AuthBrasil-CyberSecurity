@@ -175,7 +175,7 @@ export default function DashboardPage({ onLogout }: DashboardPageProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto bg-bg-deep text-slate-100 relative">
-          {currentView === 'overview' && <OverviewPage />}
+          {currentView === 'overview' && <OverviewPage onNavigate={handleNavigate} />}
           {currentView === 'analyses' && <AnalysesPage target={selectedTarget} />}
           {currentView === 'reports' && <ReportsPage onNavigate={handleNavigate} />}
           {currentView === 'vulnerabilities' && <VulnerabilitiesPage onNavigate={handleNavigate} />}

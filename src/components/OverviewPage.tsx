@@ -1,182 +1,227 @@
 import React from 'react';
 import { 
-  Link as LinkIcon, 
-  Rocket, 
   TrendingUp, 
-  DollarSign,
   Shield,
-  Award
+  Award,
+  AlertCircle,
+  Globe,
+  Github,
+  Activity,
+  BrainCircuit,
+  CheckCircle2,
+  ChevronRight,
+  Clock
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export default function OverviewPage() {
+interface OverviewPageProps {
+  onNavigate?: (view: any) => void;
+}
+
+export default function OverviewPage({ onNavigate }: OverviewPageProps) {
+  const recentActivities = [
+    { id: 1, type: 'scan', target: 'authbrasil.com.br', status: 'concluído', time: 'Há 2 horas', score: 72 },
+    { id: 2, type: 'report', target: 'Relatório Mensal', status: 'exportado', time: 'Há 5 horas' },
+    { id: 3, type: 'alert', target: 'api.cliente-alpha.com', status: 'crítico', time: 'Há 1 dia', issue: 'SSL Expirado' },
+  ];
+
+  const aiInsights = [
+    { id: 1, text: 'Feche a porta 3306 no servidor X para aumentar seu score em +15 pontos.', impact: 'Alto' },
+    { id: 2, text: 'Atualize o Nginx para a versão 1.25 (CVE-2023-XXXX).', impact: 'Médio' },
+  ];
+
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
-      {/* Header & Quick Stats */}
-      <header className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard de Segurança</h2>
-          <p className="text-slate-400 mt-1 text-sm sm:text-base">Bem-vindo de volta. Seus sistemas estão seguros.</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-xs font-bold">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            ÚLTIMO SCAN: OK
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-            <Award className="size-4" />
-            Assinatura Ativa
-          </div>
-        </div>
-      </header>
-
-      {/* Action Bar */}
-      <section className="mb-10">
-        <div className="glassmorphism p-1.5 sm:p-1 rounded-2xl flex flex-col sm:flex-row items-center gap-2 neon-glow-primary">
-          <div className="flex items-center w-full sm:flex-1">
-            <div className="pl-5 text-slate-500">
-              <LinkIcon className="size-5" />
-            </div>
-            <input 
-              type="text" 
-              placeholder="Insira URL ou Repositório"
-              className="flex-1 bg-transparent border-none focus:ring-0 text-slate-100 placeholder:text-slate-500 text-base sm:text-lg py-3 sm:py-4 px-4 sm:px-0 outline-none min-w-0"
-            />
-          </div>
-          <button className="w-full sm:w-auto bg-primary hover:bg-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all sm:mr-1 cursor-pointer">
-            <Rocket className="size-5" />
-            <span className="whitespace-nowrap">Iniciar Análise</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Metrics Row */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        {/* Progress Card */}
-        <motion.div 
-          whileHover={{ borderColor: 'rgba(19, 91, 236, 0.5)' }}
-          className="glassmorphism rounded-2xl p-6 flex items-center justify-between group transition-all"
-        >
-          <div>
-            <p className="text-slate-400 text-sm font-medium">Análises no Mês</p>
-            <h3 className="text-3xl font-bold mt-1">42<span className="text-slate-500 text-lg font-normal">/50</span></h3>
-            <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold mt-2">
-              <TrendingUp className="size-3" />
-              +12.5% vs último mês
-            </div>
-          </div>
-          <div className="relative size-20 flex items-center justify-center">
-            <svg className="size-full -rotate-90" viewBox="0 0 36 36">
-              <circle className="stroke-slate-800" cx="18" cy="18" fill="none" r="16" strokeWidth="3" />
-              <circle className="stroke-primary" cx="18" cy="18" fill="none" r="16" strokeDasharray="84, 100" strokeLinecap="round" strokeWidth="3" />
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
+      {/* Hero Section: Global Score */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
+        <div className="lg:col-span-8 glassmorphism rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-8 bg-gradient-to-br from-primary/10 via-transparent to-transparent border-primary/20">
+          <div className="relative size-48 flex items-center justify-center">
+            <svg className="size-full -rotate-90" viewBox="0 0 100 100">
+              <circle className="stroke-slate-800" cx="50" cy="50" fill="none" r="45" strokeWidth="8" />
+              <circle className="stroke-primary" cx="50" cy="50" fill="none" r="45" strokeDasharray="226, 283" strokeLinecap="round" strokeWidth="8" style={{ strokeDashoffset: 63 }} />
             </svg>
-            <span className="absolute text-xs font-bold">84%</span>
+            <div className="absolute flex flex-col items-center">
+              <span className="text-6xl font-black text-white">72</span>
+              <span className="text-[10px] text-primary font-bold tracking-widest uppercase">Score Global</span>
+            </div>
+            <div className="absolute inset-0 rounded-full shadow-[0_0_50px_rgba(59,130,246,0.2)] pointer-events-none" />
           </div>
-        </motion.div>
+          
+          <div className="flex-1 text-center sm:text-left">
+            <h2 className="text-3xl font-bold text-white mb-3">Sua saúde digital é <span className="text-primary">Boa</span></h2>
+            <p className="text-slate-400 leading-relaxed mb-6">
+              Identificamos 3 vulnerabilidades críticas que estão impactando seu score. 
+              Corrija-as para atingir o nível <span className="text-emerald-400 font-bold">Excelente</span>.
+            </p>
+            <div className="flex flex-wrap justify-center sm:justify-start gap-4">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+                <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                <span className="text-xs font-bold text-slate-300">10 Ativos Seguros</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+                <div className="size-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                <span className="text-xs font-bold text-slate-300">2 Ativos em Risco</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* Vulnerabilities Card */}
-        <motion.div 
-          whileHover={{ borderColor: 'rgba(139, 92, 246, 0.5)' }}
-          className="glassmorphism rounded-2xl p-6 group transition-all"
-        >
-          <div className="flex justify-between">
-            <p className="text-slate-400 text-sm font-medium">Vulnerabilidades Mitigadas</p>
-            <Shield className="text-accent-purple size-5" />
+        <div className="lg:col-span-4 grid grid-cols-1 gap-4">
+          <div className="glassmorphism rounded-2xl p-6 border-l-4 border-l-red-500 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alertas Críticos</p>
+              <h3 className="text-2xl font-bold text-white mt-1">03</h3>
+            </div>
+            <AlertCircle className="text-red-500 size-8 opacity-50" />
           </div>
-          <h3 className="text-3xl font-bold mt-1">128</h3>
-          <p className="text-slate-500 text-xs mt-2 font-medium">Total de patches aplicados este ano</p>
-          <div className="mt-4 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-accent-purple to-primary w-3/4" />
+          <div className="glassmorphism rounded-2xl p-6 border-l-4 border-l-amber-500 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alertas Médios</p>
+              <h3 className="text-2xl font-bold text-white mt-1">12</h3>
+            </div>
+            <AlertCircle className="text-amber-500 size-8 opacity-50" />
           </div>
-        </motion.div>
-
-        {/* ROI Card */}
-        <motion.div 
-          whileHover={{ borderColor: 'rgba(16, 185, 129, 0.5)' }}
-          className="glassmorphism rounded-2xl p-6 group transition-all"
-        >
-          <div className="flex justify-between">
-            <p className="text-slate-400 text-sm font-medium">Economia Estimada</p>
-            <DollarSign className="text-emerald-400 size-5" />
+          <div className="glassmorphism rounded-2xl p-6 border-l-4 border-l-blue-500 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alertas Baixos</p>
+              <h3 className="text-2xl font-bold text-white mt-1">05</h3>
+            </div>
+            <AlertCircle className="text-blue-500 size-8 opacity-50" />
           </div>
-          <h3 className="text-3xl font-bold mt-1">R$ 15.400,00</h3>
-          <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold mt-2">
-            <Shield className="size-3" />
-            ROI em Riscos Evitados
-          </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* Analytics Charts Area */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Security Evolution Chart (Main) */}
-        <div className="lg:col-span-2 glassmorphism rounded-3xl p-8">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h4 className="text-lg font-bold">Evolução da Segurança</h4>
-              <p className="text-sm text-slate-500">Média de Security Score nos últimos 6 meses</p>
+      {/* Asset Status & Activity */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
+        {/* Asset Inventory */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          <h3 className="text-lg font-bold text-white px-2">Inventário de Ativos</h3>
+          
+          <div className="glassmorphism rounded-2xl p-6 relative overflow-hidden group">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <Globe className="text-emerald-400 size-6" />
+              </div>
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">DAST ATIVO</span>
             </div>
-            <select className="bg-slate-900 border-slate-700 rounded-lg text-xs font-bold text-slate-300 px-3 py-1.5 focus:ring-primary focus:border-primary outline-none">
-              <option>Últimos 6 Meses</option>
-              <option>Este Ano</option>
-            </select>
+            <h4 className="text-xl font-bold text-white">Websites & APIs</h4>
+            <p className="text-xs text-slate-500 mt-1">12 domínios monitorados</p>
+            <div className="mt-6 flex items-center justify-between text-xs">
+              <span className="text-slate-400">Saúde Média</span>
+              <span className="text-emerald-400 font-bold">88%</span>
+            </div>
+            <div className="mt-2 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 w-[88%]" />
+            </div>
           </div>
-          <div className="h-64 flex items-end justify-between gap-4 px-2">
-            {[
-              { label: 'Jan', h: 'h-32', activeH: 'h-20', opacity: 'opacity-40' },
-              { label: 'Fev', h: 'h-40', activeH: 'h-28', opacity: 'opacity-50' },
-              { label: 'Mar', h: 'h-36', activeH: 'h-24', opacity: 'opacity-60' },
-              { label: 'Abr', h: 'h-48', activeH: 'h-40', opacity: 'opacity-70' },
-              { label: 'Mai', h: 'h-56', activeH: 'h-48', opacity: 'opacity-80' },
-              { label: 'Jun', h: 'h-60', activeH: 'h-52', opacity: 'opacity-100', isCurrent: true },
-            ].map((item, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                <div className={`w-full bg-slate-800/50 rounded-t-lg relative ${item.h} hover:bg-primary/20 transition-all ${item.isCurrent ? 'border-x border-t border-primary/30' : ''}`}>
-                  <div className={`absolute bottom-0 w-full bg-primary ${item.activeH} rounded-t-lg ${item.opacity} ${item.isCurrent ? 'neon-glow-primary' : ''}`} />
+
+          <div className="glassmorphism rounded-2xl p-6 relative overflow-hidden opacity-60 grayscale hover:grayscale-0 transition-all cursor-help">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                <Github className="text-primary size-6" />
+              </div>
+              <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded">SAST v2.0</span>
+            </div>
+            <h4 className="text-xl font-bold text-white">Repositórios</h4>
+            <p className="text-xs text-slate-500 mt-1">Análise de código estático (OWASP)</p>
+            <div className="mt-6 flex items-center justify-center py-2 border border-dashed border-white/10 rounded-lg">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Em Breve</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          <h3 className="text-lg font-bold text-white px-2">Atividade Recente</h3>
+          <div className="glassmorphism rounded-2xl overflow-hidden">
+            {recentActivities.map((activity, i) => (
+              <div key={activity.id} className={`p-4 flex items-center gap-4 hover:bg-white/5 transition-colors ${i !== recentActivities.length - 1 ? 'border-b border-white/5' : ''}`}>
+                <div className={`p-2 rounded-lg ${
+                  activity.type === 'scan' ? 'bg-blue-500/10 text-blue-400' : 
+                  activity.type === 'report' ? 'bg-emerald-500/10 text-emerald-400' : 
+                  'bg-red-500/10 text-red-400'
+                }`}>
+                  {activity.type === 'scan' ? <Activity className="size-4" /> : 
+                   activity.type === 'report' ? <Award className="size-4" /> : 
+                   <AlertCircle className="size-4" />}
                 </div>
-                <span className={`text-[10px] font-bold uppercase ${item.isCurrent ? 'text-primary' : 'text-slate-500'}`}>{item.label}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                    <h5 className="text-sm font-bold text-slate-200 truncate">{activity.target}</h5>
+                    <span className="text-[10px] text-slate-500 whitespace-nowrap ml-2">{activity.time}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {activity.type === 'alert' ? activity.issue : `Ação ${activity.status} com sucesso.`}
+                  </p>
+                </div>
+                {activity.score && (
+                  <div className="text-right">
+                    <span className={`text-xs font-bold ${activity.score > 80 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      {activity.score}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+            <button 
+              onClick={() => onNavigate?.('reports')}
+              className="w-full p-3 text-xs font-bold text-primary hover:bg-primary/5 transition-colors border-t border-white/5 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              Ver Histórico Completo <ChevronRight className="size-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* AI Insights */}
+        <div className="lg:col-span-3 flex flex-col gap-6">
+          <h3 className="text-lg font-bold text-white px-2 flex items-center gap-2">
+            <BrainCircuit className="size-5 text-primary" /> Insights IA
+          </h3>
+          <div className="flex flex-col gap-4">
+            {aiInsights.map((insight) => (
+              <div key={insight.id} className="glassmorphism rounded-2xl p-5 bg-gradient-to-br from-primary/5 to-transparent border-primary/10">
+                <div className="flex justify-between items-start mb-3">
+                  <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase ${
+                    insight.impact === 'Alto' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                  }`}>Impacto {insight.impact}</span>
+                  <Clock className="size-3 text-slate-600" />
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed italic">
+                  "{insight.text}"
+                </p>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* Severity Radar/Category Chart */}
-        <div className="glassmorphism rounded-3xl p-8">
-          <h4 className="text-lg font-bold mb-1">Severidade por Categoria</h4>
-          <p className="text-sm text-slate-500 mb-8">Foco de risco atual</p>
-          <div className="relative size-full flex items-center justify-center min-h-[220px]">
-            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <div className="size-48 border border-slate-500 rounded-full rotate-45" />
-              <div className="size-32 border border-slate-500 rounded-full rotate-45" />
-              <div className="size-16 border border-slate-500 rounded-full rotate-45" />
-              <div className="absolute w-px h-52 bg-slate-500" />
-              <div className="absolute h-px w-52 bg-slate-500" />
-            </div>
-            <div className="absolute top-0 text-[10px] font-bold text-slate-400">HTTP/S</div>
-            <div className="absolute bottom-0 text-[10px] font-bold text-slate-400">CMS</div>
-            <div className="absolute right-0 text-[10px] font-bold text-slate-400">SSL/TLS</div>
-            <div className="absolute left-0 text-[10px] font-bold text-slate-400">PORTS</div>
-            <svg className="size-40 relative z-10 fill-accent-purple/30 stroke-accent-purple stroke-2" viewBox="0 0 100 100">
-              <polygon points="50,10 85,50 50,75 25,40" />
-              <circle cx="50" cy="10" fill="#8b5cf6" r="3" />
-              <circle cx="85" cy="50" fill="#8b5cf6" r="3" />
-              <circle cx="50" cy="75" fill="#8b5cf6" r="3" />
-              <circle cx="25" cy="40" fill="#8b5cf6" r="3" />
-            </svg>
+      {/* Evolution Chart */}
+      <section className="glassmorphism rounded-3xl p-8 mb-10">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h4 className="text-lg font-bold">Evolução da Segurança</h4>
+            <p className="text-sm text-slate-500">Média de Security Score nos últimos 6 meses</p>
           </div>
-          <div className="mt-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400">SSL/TLS</span>
-              <span className="text-xs font-bold text-emerald-400">Crítico (0)</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400">HTTP Configuration</span>
-              <span className="text-xs font-bold text-amber-400">Médio (3)</span>
-            </div>
+          <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
+            <TrendingUp className="size-4" /> +12.5%
           </div>
+        </div>
+        <div className="h-48 flex items-end justify-between gap-4 px-2">
+          {[
+            { label: 'Jan', h: 'h-24', activeH: 'h-16', opacity: 'opacity-40' },
+            { label: 'Fev', h: 'h-32', activeH: 'h-20', opacity: 'opacity-50' },
+            { label: 'Mar', h: 'h-28', activeH: 'h-18', opacity: 'opacity-60' },
+            { label: 'Abr', h: 'h-36', activeH: 'h-28', opacity: 'opacity-70' },
+            { label: 'Mai', h: 'h-40', activeH: 'h-32', opacity: 'opacity-80' },
+            { label: 'Jun', h: 'h-44', activeH: 'h-36', opacity: 'opacity-100', isCurrent: true },
+          ].map((item, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
+              <div className={`w-full bg-slate-800/50 rounded-t-lg relative ${item.h} hover:bg-primary/20 transition-all ${item.isCurrent ? 'border-x border-t border-primary/30' : ''}`}>
+                <div className={`absolute bottom-0 w-full bg-primary ${item.activeH} rounded-t-lg ${item.opacity} ${item.isCurrent ? 'neon-glow-primary' : ''}`} />
+              </div>
+              <span className={`text-[10px] font-bold uppercase ${item.isCurrent ? 'text-primary' : 'text-slate-500'}`}>{item.label}</span>
+            </div>
+          ))}
         </div>
       </section>
     </div>

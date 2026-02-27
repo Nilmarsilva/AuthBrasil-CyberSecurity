@@ -62,6 +62,16 @@ export default function DashboardPage({ onLogout }: DashboardPageProps) {
         </div>
       </div>
 
+      <div className="px-4 mt-2">
+        <button 
+          onClick={() => handleNavigate('analyses')}
+          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white py-3 rounded-xl shadow-neon transition-all duration-300 transform hover:scale-[1.02] active:scale-95 group cursor-pointer"
+        >
+          <Shield className="size-5 group-hover:animate-pulse" />
+          <span className="font-bold tracking-wide">Nova Varredura</span>
+        </button>
+      </div>
+
       <nav className="flex-1 px-4 space-y-2 mt-4">
         {menuItems.map((item) => {
           const Icon = item.icon;

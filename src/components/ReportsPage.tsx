@@ -73,7 +73,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
             </p>
           </div>
           <button 
-            onClick={() => onNavigate?.('overview')}
+            onClick={() => onNavigate?.('analyses')}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
           >
             <Shield className="size-5 group-hover:animate-pulse" />

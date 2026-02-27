@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
   FileDown, 
@@ -40,6 +40,34 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
   const [expandedId, setExpandedId] = useState<string | null>('vuln-1');
   const [scanTarget, setScanTarget] = useState(target || '');
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const mainElement = document.querySelector('main');
+    if (!mainElement) return;
+
+    const handleScroll = () => {
+      const currentScrollY = mainElement.scrollTop;
+      
+      // Only apply hide/show on mobile/tablet (below lg breakpoint or just sm/md)
+      // The user mentioned "no mobile", so let's target sm/md
+      if (window.innerWidth < 1024) { 
+        if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
+      } else {
+        setIsVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    mainElement.addEventListener('scroll', handleScroll);
+    return () => mainElement.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (target) setScanTarget(target);
@@ -143,7 +171,7 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="h-auto min-h-[5rem] border-b border-white/5 flex flex-col sm:flex-row items-center px-4 sm:px-8 py-4 sm:py-0 sticky top-0 bg-[#050810]/80 backdrop-blur-md z-50 gap-4">
+      <header className={`h-auto min-h-[5rem] border-b border-white/5 flex flex-col sm:flex-row items-center px-4 sm:px-8 py-4 sm:py-0 sticky top-0 bg-[#050810]/80 backdrop-blur-md z-50 gap-4 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="w-full sm:flex-1 flex items-center gap-4">
           <div className="relative flex-1 max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 size-5" />

@@ -36,7 +36,7 @@ export default function OverviewPage() {
       {/* Action Bar */}
       <section className="mb-10">
         <div className="glassmorphism p-1.5 sm:p-1 rounded-2xl flex flex-col sm:flex-row items-center gap-2 neon-glow-primary">
-          <div className="flex items-center w-full sm:w-auto">
+          <div className="flex items-center w-full sm:flex-1">
             <div className="pl-5 text-slate-500">
               <LinkIcon className="size-5" />
             </div>

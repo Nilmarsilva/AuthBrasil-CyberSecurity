@@ -7,7 +7,7 @@ import {
   Settings, 
   CheckCircle, 
   LogOut, 
-  ShieldCheck, 
+  Shield, 
   CreditCard,
   Menu,
   X as CloseIcon
@@ -53,12 +53,12 @@ export default function DashboardPage({ onLogout }: DashboardPageProps) {
   const SidebarContent = () => (
     <>
       <div className="p-6 flex items-center gap-3">
-        <div className="size-10 rounded-lg bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center text-white">
-          <ShieldCheck className="size-6 fill-white/20" />
+        <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <Shield className="size-6 text-primary" />
         </div>
         <div>
           <h1 className="text-xl font-bold tracking-tight text-white leading-none">AuthBrasil</h1>
-          <p className="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wider">Security Cloud</p>
+          <p className="text-[10px] text-primary font-medium mt-1 uppercase tracking-widest">Security Cloud</p>
         </div>
       </div>
 
@@ -160,8 +160,8 @@ export default function DashboardPage({ onLogout }: DashboardPageProps) {
         {/* Mobile Header */}
         <header className="lg:hidden flex items-center justify-between p-4 bg-slate-950 border-b border-slate-800 sticky top-0 z-50">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center text-white">
-              <ShieldCheck className="size-5 fill-white/20" />
+            <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Shield className="size-5 text-primary" />
             </div>
             <h1 className="text-lg font-bold tracking-tight text-white leading-none">AuthBrasil</h1>
           </div>

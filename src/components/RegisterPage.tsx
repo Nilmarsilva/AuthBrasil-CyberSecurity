@@ -16,8 +16,8 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
 
       <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-20 py-4 sm:py-6 border-b border-slate-800/50 backdrop-blur-md sticky top-0">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="size-6 sm:size-8 text-primary flex items-center justify-center">
-            <Shield className="size-6 sm:size-8" />
+          <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Shield className="size-5 sm:size-6 text-primary" />
           </div>
           <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-100 font-display">
             AuthBrasil <span className="text-primary">Security</span>

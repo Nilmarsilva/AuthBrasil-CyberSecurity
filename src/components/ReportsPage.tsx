@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  ShieldAlert, 
+  Shield, 
   Search, 
   Eye, 
   Download, 
@@ -76,7 +76,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
             onClick={() => onNavigate?.('overview')}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
           >
-            <ShieldAlert className="size-5 group-hover:animate-pulse" />
+            <Shield className="size-5 group-hover:animate-pulse" />
             <span className="text-sm font-bold tracking-wide">Nova Varredura</span>
           </button>
         </header>

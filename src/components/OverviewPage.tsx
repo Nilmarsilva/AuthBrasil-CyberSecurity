@@ -4,7 +4,7 @@ import {
   Rocket, 
   TrendingUp, 
   DollarSign,
-  ShieldCheck,
+  Shield,
   Award
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -84,7 +84,7 @@ export default function OverviewPage() {
         >
           <div className="flex justify-between">
             <p className="text-slate-400 text-sm font-medium">Vulnerabilidades Mitigadas</p>
-            <ShieldCheck className="text-accent-purple size-5" />
+            <Shield className="text-accent-purple size-5" />
           </div>
           <h3 className="text-3xl font-bold mt-1">128</h3>
           <p className="text-slate-500 text-xs mt-2 font-medium">Total de patches aplicados este ano</p>
@@ -104,7 +104,7 @@ export default function OverviewPage() {
           </div>
           <h3 className="text-3xl font-bold mt-1">R$ 15.400,00</h3>
           <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold mt-2">
-            <ShieldCheck className="size-3" />
+            <Shield className="size-3" />
             ROI em Riscos Evitados
           </div>
         </motion.div>

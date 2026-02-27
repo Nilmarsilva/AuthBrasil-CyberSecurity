@@ -3,7 +3,7 @@ import {
   Search, 
   FileDown, 
   Info, 
-  ShieldCheck, 
+  Shield, 
   Router, 
   Server, 
   History, 
@@ -237,7 +237,7 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">SSL/HTTPS Status</p>
                   <h3 className="text-base sm:text-lg font-bold text-white mt-1">Certificado Ativo</h3>
                 </div>
-                <ShieldCheck className="text-success-neon size-5" />
+                <Shield className="text-success-neon size-5" />
               </div>
               <p className="text-[10px] sm:text-xs text-slate-500 mt-3">Expira em 142 dias (Let's Encrypt)</p>
             </div>

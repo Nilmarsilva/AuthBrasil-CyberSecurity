@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   CheckCircle2, 
   XCircle, 
-  ShieldCheck, 
+  Shield, 
   CreditCard, 
   Download, 
   AlertTriangle, 
@@ -91,7 +91,7 @@ export default function PlansPage() {
               'Relatórios PDF Detalhados'
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3 text-sm">
-                <ShieldCheck className="text-primary size-5" />
+                <Shield className="text-primary size-5" />
                 {feature}
               </div>
             ))}
@@ -134,7 +134,7 @@ export default function PlansPage() {
           <h3 className="text-xl font-bold text-white">Plano Atual</h3>
           <div className="glass-card p-8 rounded-2xl border-primary/20 bg-primary/5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <ShieldCheck className="size-24 text-primary" />
+              <Shield className="size-24 text-primary" />
             </div>
             
             <div className="flex flex-col gap-6 relative z-10">

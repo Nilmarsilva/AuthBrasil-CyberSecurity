@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  ShieldAlert, 
+  Shield, 
   HelpCircle, 
   ArrowRight, 
   Lock, 
@@ -9,7 +9,6 @@ import {
   SearchCode, 
   Mail, 
   Cookie,
-  ShieldCheck,
   Share2,
   FileCode,
   FileCheck,
@@ -44,7 +43,7 @@ export default function VulnerabilitiesPage({ onNavigate }: VulnerabilitiesPageP
       criteria: 'Ausência de redirecionamento automático resulta em penalidade total de 20 pontos.'
     },
     {
-      icon: <ShieldCheck className="size-6" />,
+      icon: <Shield className="size-6" />,
       title: 'Security Headers',
       tag: 'APLICAÇÃO',
       color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
@@ -158,7 +157,7 @@ export default function VulnerabilitiesPage({ onNavigate }: VulnerabilitiesPageP
             onClick={() => onNavigate?.('overview')}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow-neon transition-all duration-300 transform hover:scale-105 active:scale-95 group cursor-pointer"
           >
-            <ShieldAlert className="size-5 group-hover:animate-pulse" />
+            <Shield className="size-5 group-hover:animate-pulse" />
             <span className="text-sm font-bold tracking-wide">Nova Varredura</span>
           </button>
         </div>

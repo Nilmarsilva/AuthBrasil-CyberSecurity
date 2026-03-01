@@ -6,12 +6,13 @@ import LandingAboutUsPage from './components/LandingAboutUsPage';
 import LandingSampleReportPage from './components/LandingSampleReportPage';
 import LandingApiDocsPage from './components/LandingApiDocsPage';
 import LandingContactPage from './components/LandingContactPage';
+import { LandingTermsPage, LandingPrivacyPage, LandingCookiesPage } from './components/LandingLegalPages';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import DashboardPage from './components/DashboardPage';
 
 export default function App() {
-  const [view, setView] = useState<'landing' | 'pricing' | 'how-it-works' | 'about-us' | 'sample-report' | 'api-docs' | 'contact' | 'login' | 'register' | 'dashboard'>('landing');
+  const [view, setView] = useState<'landing' | 'pricing' | 'how-it-works' | 'about-us' | 'sample-report' | 'api-docs' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'login' | 'register' | 'dashboard'>('landing');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -29,6 +30,9 @@ export default function App() {
           onSampleReport={() => setView('sample-report')}
           onApiDocs={() => setView('api-docs')}
           onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'pricing' && (
@@ -41,6 +45,9 @@ export default function App() {
           onSampleReport={() => setView('sample-report')}
           onApiDocs={() => setView('api-docs')}
           onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'how-it-works' && (
@@ -53,6 +60,9 @@ export default function App() {
           onSampleReport={() => setView('sample-report')}
           onApiDocs={() => setView('api-docs')}
           onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'about-us' && (
@@ -65,6 +75,9 @@ export default function App() {
           onSampleReport={() => setView('sample-report')}
           onApiDocs={() => setView('api-docs')}
           onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'sample-report' && (
@@ -77,6 +90,9 @@ export default function App() {
           onAboutUs={() => setView('about-us')}
           onApiDocs={() => setView('api-docs')}
           onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'api-docs' && (
@@ -89,6 +105,9 @@ export default function App() {
           onAboutUs={() => setView('about-us')}
           onSampleReport={() => setView('sample-report')}
           onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'contact' && (
@@ -101,6 +120,51 @@ export default function App() {
           onAboutUs={() => setView('about-us')}
           onSampleReport={() => setView('sample-report')}
           onApiDocs={() => setView('api-docs')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
+        />
+      )}
+      {view === 'terms' && (
+        <LandingTermsPage 
+          onBack={() => setView('landing')}
+          onPricing={() => setView('pricing')}
+          onHowItWorks={() => setView('how-it-works')}
+          onAboutUs={() => setView('about-us')}
+          onSampleReport={() => setView('sample-report')}
+          onApiDocs={() => setView('api-docs')}
+          onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
+        />
+      )}
+      {view === 'privacy' && (
+        <LandingPrivacyPage 
+          onBack={() => setView('landing')}
+          onPricing={() => setView('pricing')}
+          onHowItWorks={() => setView('how-it-works')}
+          onAboutUs={() => setView('about-us')}
+          onSampleReport={() => setView('sample-report')}
+          onApiDocs={() => setView('api-docs')}
+          onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
+        />
+      )}
+      {view === 'cookies' && (
+        <LandingCookiesPage 
+          onBack={() => setView('landing')}
+          onPricing={() => setView('pricing')}
+          onHowItWorks={() => setView('how-it-works')}
+          onAboutUs={() => setView('about-us')}
+          onSampleReport={() => setView('sample-report')}
+          onApiDocs={() => setView('api-docs')}
+          onContact={() => setView('contact')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
+          onCookies={() => setView('cookies')}
         />
       )}
       {view === 'login' && (

@@ -22,6 +22,9 @@ interface LandingContactPageProps {
   onAboutUs: () => void;
   onSampleReport: () => void;
   onApiDocs: () => void;
+  onTerms: () => void;
+  onPrivacy: () => void;
+  onCookies: () => void;
 }
 
 export default function LandingContactPage({ 
@@ -32,7 +35,10 @@ export default function LandingContactPage({
   onHowItWorks, 
   onAboutUs,
   onSampleReport,
-  onApiDocs
+  onApiDocs,
+  onTerms,
+  onPrivacy,
+  onCookies
 }: LandingContactPageProps) {
   const [formState, setFormState] = useState<'idle' | 'submitting' | 'success'>('idle');
 
@@ -272,7 +278,6 @@ export default function LandingContactPage({
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Empresa</h3>
               <ul className="space-y-3">
                 <li><button onClick={onAboutUs} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Sobre Nós</button></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Carreiras</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Blog de Segurança</a></li>
                 <li><button onClick={() => {}} className="text-sm text-lp-primary font-bold transition-colors cursor-default text-left">Contato</button></li>
               </ul>
@@ -280,9 +285,9 @@ export default function LandingContactPage({
             <div>
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Legal</h3>
               <ul className="space-y-3">
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Termos de Uso</a></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Privacidade</a></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Cookies</a></li>
+                <li><button onClick={onTerms} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Termos de Uso</button></li>
+                <li><button onClick={onPrivacy} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Privacidade</button></li>
+                <li><button onClick={onCookies} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Cookies</button></li>
               </ul>
             </div>
           </div>

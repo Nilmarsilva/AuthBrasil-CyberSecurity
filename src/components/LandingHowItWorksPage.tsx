@@ -9,9 +9,12 @@ interface LandingHowItWorksPageProps {
   onSampleReport: () => void;
   onApiDocs: () => void;
   onContact: () => void;
+  onTerms: () => void;
+  onPrivacy: () => void;
+  onCookies: () => void;
 }
 
-export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPricing, onAboutUs, onSampleReport, onApiDocs, onContact }: LandingHowItWorksPageProps) {
+export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPricing, onAboutUs, onSampleReport, onApiDocs, onContact, onTerms, onPrivacy, onCookies }: LandingHowItWorksPageProps) {
   return (
     <div className="font-body antialiased overflow-x-hidden bg-cyber-mesh min-h-screen flex flex-col selection:bg-lp-primary selection:text-primary-content">
       <header className="sticky top-0 z-50 w-full border-b border-lp-border-neon bg-lp-surface-dark/80 backdrop-blur-xl">
@@ -391,7 +394,6 @@ export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPric
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Empresa</h3>
               <ul className="space-y-3">
                 <li><button onClick={onAboutUs} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Sobre Nós</button></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Carreiras</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Blog de Segurança</a></li>
                 <li><button onClick={onContact} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Contato</button></li>
               </ul>
@@ -399,9 +401,9 @@ export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPric
             <div>
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Legal</h3>
               <ul className="space-y-3">
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Termos de Uso</a></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Privacidade</a></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Cookies</a></li>
+                <li><button onClick={onTerms} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Termos de Uso</button></li>
+                <li><button onClick={onPrivacy} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Privacidade</button></li>
+                <li><button onClick={onCookies} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Cookies</button></li>
               </ul>
             </div>
           </div>

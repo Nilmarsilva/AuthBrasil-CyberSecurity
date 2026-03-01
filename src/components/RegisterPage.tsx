@@ -5,9 +5,13 @@ import { motion } from 'motion/react';
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
   onRegister: () => void;
+  onHome: () => void;
+  onHowItWorks: () => void;
+  onAboutUs: () => void;
+  onPricing: () => void;
 }
 
-export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPageProps) {
+export default function RegisterPage({ onSwitchToLogin, onRegister, onHome, onHowItWorks, onAboutUs, onPricing }: RegisterPageProps) {
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Digital Grid Background */}
@@ -15,7 +19,7 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-bg-dark/80 to-bg-dark pointer-events-none" />
 
       <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-20 py-4 sm:py-6 border-b border-slate-800/50 backdrop-blur-md sticky top-0">
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={onHome}>
           <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
             <Shield className="size-5 sm:size-6 text-primary" />
           </div>
@@ -25,9 +29,10 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
         </div>
         <div className="flex items-center gap-4 sm:gap-8">
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Início</a>
-            <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Soluções</a>
-            <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Sobre Nós</a>
+            <button onClick={onHome} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Recursos</button>
+            <button onClick={onHowItWorks} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Como Funciona</button>
+            <button onClick={onPricing} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Preços</button>
+            <button onClick={onAboutUs} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Sobre Nós</button>
           </nav>
           <div className="hidden sm:block h-6 w-px bg-slate-800" />
           <button 
@@ -143,8 +148,9 @@ export default function RegisterPage({ onSwitchToLogin, onRegister }: RegisterPa
 
       <footer className="relative z-10 py-6 sm:py-8 px-4 sm:px-6 lg:px-20 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] sm:text-xs text-slate-600">
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-center sm:text-left">
-          <span>© 2024 AuthBrasil Security Solutions.</span>
+          <span>© 2026 AuthBrasil Security Solutions.</span>
           <div className="flex gap-4">
+            <button onClick={onAboutUs} className="hover:text-slate-400 cursor-pointer">Sobre Nós</button>
             <a href="#" className="hover:text-slate-400">Termos</a>
             <a href="#" className="hover:text-slate-400">Privacidade</a>
           </div>

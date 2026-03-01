@@ -52,12 +52,20 @@ export default function App() {
         <LoginPage 
           onSwitchToRegister={() => setView('register')} 
           onLogin={() => setView('dashboard')}
+          onHome={() => setView('landing')}
+          onHowItWorks={() => setView('how-it-works')}
+          onAboutUs={() => setView('about-us')}
+          onPricing={() => setView('pricing')}
         />
       )}
       {view === 'register' && (
         <RegisterPage 
           onSwitchToLogin={() => setView('login')} 
           onRegister={() => setView('dashboard')}
+          onHome={() => setView('landing')}
+          onHowItWorks={() => setView('how-it-works')}
+          onAboutUs={() => setView('about-us')}
+          onPricing={() => setView('pricing')}
         />
       )}
       {view === 'dashboard' && (

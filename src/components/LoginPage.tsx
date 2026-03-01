@@ -5,11 +5,43 @@ import { motion } from 'motion/react';
 interface LoginPageProps {
   onSwitchToRegister: () => void;
   onLogin: () => void;
+  onHome: () => void;
+  onHowItWorks: () => void;
+  onAboutUs: () => void;
+  onPricing: () => void;
 }
 
-export default function LoginPage({ onSwitchToRegister, onLogin }: LoginPageProps) {
+export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowItWorks, onAboutUs, onPricing }: LoginPageProps) {
   return (
-    <div className="min-h-screen flex w-full bg-bg-dark relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-bg-dark relative overflow-hidden">
+      {/* Header for consistency */}
+      <header className="relative z-20 flex items-center justify-between px-4 sm:px-6 lg:px-20 py-4 sm:py-6 border-b border-slate-800/50 backdrop-blur-md sticky top-0">
+        <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={onHome}>
+          <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Shield className="size-5 sm:size-6 text-primary" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-100 font-display">
+            AuthBrasil <span className="text-primary">Security</span>
+          </h2>
+        </div>
+        <div className="flex items-center gap-4 sm:gap-8">
+          <nav className="hidden md:flex items-center gap-8">
+            <button onClick={onHome} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Recursos</button>
+            <button onClick={onHowItWorks} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Como Funciona</button>
+            <button onClick={onPricing} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Preços</button>
+            <button onClick={onAboutUs} className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Sobre Nós</button>
+          </nav>
+          <div className="hidden sm:block h-6 w-px bg-slate-800" />
+          <button 
+            onClick={onSwitchToRegister}
+            className="text-sm font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+          >
+            Criar Conta
+          </button>
+        </div>
+      </header>
+
+      <div className="flex-1 flex w-full relative overflow-hidden">
       {/* Left Side: Hero Branding */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden border-r border-slate-800/50">
         <div className="absolute inset-0 z-0 opacity-20 grid-bg" />
@@ -19,7 +51,8 @@ export default function LoginPage({ onSwitchToRegister, onLogin }: LoginPageProp
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mb-8 inline-flex items-center justify-center p-4 rounded-full bg-primary/10 border border-primary/20"
+            className="mb-8 inline-flex items-center justify-center p-4 rounded-full bg-primary/10 border border-primary/20 cursor-pointer"
+            onClick={onHome}
           >
             <Shield className="text-primary size-16" />
           </motion.div>
@@ -77,7 +110,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin }: LoginPageProp
           className="w-full max-w-[480px] glass rounded-2xl p-6 sm:p-10 shadow-2xl relative z-10"
         >
           <div className="flex flex-col gap-2 mb-8 sm:mb-10 text-left">
-            <div className="lg:hidden mb-6 flex items-center gap-3">
+            <div className="lg:hidden mb-6 flex items-center gap-3 cursor-pointer" onClick={onHome}>
               <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
                 <Shield className="text-primary size-8" />
               </div>
@@ -170,6 +203,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin }: LoginPageProp
             <a href="#" className="hover:text-slate-400 transition-colors">Privacidade</a>
             <a href="#" className="hover:text-slate-400 transition-colors">Suporte 24/7</a>
           </div>
+        </div>
         </div>
       </div>
     </div>

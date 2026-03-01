@@ -22,7 +22,7 @@ export default function LandingPage({ onStart, onLogin, onPricing, onHowItWorks,
               <span className="text-xl font-display font-bold tracking-tight text-text-main">AuthBrasil<span className="text-lp-primary">.io</span></span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
-              <a className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors hover:shadow-[0_0_10px_rgba(0,240,255,0.3)]" href="#">Recursos</a>
+              <span className="text-sm font-medium text-lp-primary transition-colors cursor-default drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">Recursos</span>
               <button onClick={onHowItWorks} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Como Funciona</button>
               <button onClick={onPricing} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Preços</button>
               <button onClick={onAboutUs} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Sobre Nós</button>

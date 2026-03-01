@@ -67,6 +67,79 @@ export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPric
           </div>
         </section>
 
+        {/* NeuralCore Intelligence Section */}
+        <section className="py-12 relative overflow-hidden">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="lp-glass-panel rounded-3xl p-8 lg:p-12 border border-lp-border-neon/30 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <span className="material-symbols-outlined text-9xl text-lp-primary">psychology</span>
+              </div>
+              
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+                <div className="lg:col-span-1">
+                  <h2 className="text-3xl font-display font-bold text-white mb-6">O Cérebro do Scan: <span className="text-lp-primary">NeuralCore™</span></h2>
+                  <p className="text-text-muted mb-8 leading-relaxed">
+                    Diferente de scanners tradicionais que apenas "atiram para todos os lados", o NeuralCore™ utiliza uma camada de inteligência heurística para entender o contexto da sua aplicação.
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-lp-primary/20 flex items-center justify-center border border-lp-primary/30">
+                        <span className="material-symbols-outlined text-lp-primary text-sm">auto_awesome</span>
+                      </div>
+                      <span className="text-sm font-bold text-white uppercase tracking-wider">Análise Adaptativa</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-lp-secondary/20 flex items-center justify-center border border-lp-secondary/30">
+                        <span className="material-symbols-outlined text-lp-secondary text-sm">model_training</span>
+                      </div>
+                      <span className="text-sm font-bold text-white uppercase tracking-wider">Payloads Contextuais</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-lp-surface-dark/40 border border-white/5 p-6 rounded-2xl hover:border-lp-primary/40 transition-colors">
+                    <h4 className="text-lp-primary font-bold mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm">query_stats</span>
+                      Heurística de Descoberta
+                    </h4>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Mapeamos não apenas URLs, mas o comportamento esperado de cada endpoint. Isso permite identificar falhas de lógica que ferramentas comuns ignoram.
+                    </p>
+                  </div>
+                  <div className="bg-lp-surface-dark/40 border border-white/5 p-6 rounded-2xl hover:border-lp-secondary/40 transition-colors">
+                    <h4 className="text-lp-secondary font-bold mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm">terminal</span>
+                      Injeção Polimórfica
+                    </h4>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Nossos payloads se adaptam em tempo real. Se o NeuralCore™ detecta um WAF, ele altera a codificação do ataque para validar se a proteção é contornável.
+                    </p>
+                  </div>
+                  <div className="bg-lp-surface-dark/40 border border-white/5 p-6 rounded-2xl hover:border-lp-primary/40 transition-colors">
+                    <h4 className="text-lp-primary font-bold mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm">visibility</span>
+                      Validação Comportamental
+                    </h4>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Zero Falso-Positivo. Confirmamos a vulnerabilidade observando efeitos colaterais reais (como tempo de resposta ou vazamento de dados controlados).
+                    </p>
+                  </div>
+                  <div className="bg-lp-surface-dark/40 border border-white/5 p-6 rounded-2xl hover:border-lp-secondary/40 transition-colors">
+                    <h4 className="text-lp-secondary font-bold mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm">history_edu</span>
+                      Dossiê de Exploração
+                    </h4>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Cada falha encontrada acompanha um "Proof of Concept" (PoC) detalhado, provando exatamente como o ataque foi bem-sucedido.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="relative pb-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
             <div className="hidden lg:block absolute left-1/2 top-0 bottom-20 w-0.5 bg-gradient-to-b from-lp-primary via-lp-secondary to-transparent -translate-x-1/2 z-0 opacity-50"></div>
@@ -144,7 +217,10 @@ export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPric
                       <div className="bg-transparent"></div><div className="bg-lp-secondary/10"></div><div className="bg-transparent"></div><div className="bg-lp-secondary/20"></div>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-lp-secondary font-mono text-xs tracking-widest mb-2">NEURAL_ANALYSIS</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="material-symbols-outlined text-lp-secondary text-sm animate-pulse">psychology</span>
+                        <span className="text-lp-secondary font-mono text-xs tracking-widest">NEURALCORE_ENGINE</span>
+                      </div>
                       <div className="w-32 h-1 bg-gray-800 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-lp-secondary to-lp-primary w-2/3 animate-scan-line"></div>
                       </div>
@@ -164,7 +240,7 @@ export default function LandingHowItWorksPage({ onBack, onStart, onLogin, onPric
                   <div className="absolute -top-6 -right-6 lg:-left-6 bg-lp-surface-dark border border-lp-secondary/30 text-lp-secondary font-mono text-xl w-12 h-12 flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(112,0,255,0.2)]">02</div>
                   <h3 className="text-2xl font-display font-bold text-white mb-4">Deep DAST Scanning</h3>
                   <p className="text-text-muted mb-6">
-                    Nossos bots executam milhares de payloads em tempo real contra sua aplicação, testando vulnerabilidades de injeção, quebra de autenticação e falhas de lógica.
+                    Alimentado pelo <span className="text-lp-primary font-bold">NeuralCore™</span>, nossos bots executam milhares de payloads inteligentes em tempo real contra sua aplicação, testando vulnerabilidades de injeção e falhas de lógica complexas.
                   </p>
                   <ul className="space-y-3 font-mono text-xs">
                     <li className="flex items-center gap-3 text-gray-300">

@@ -6,9 +6,12 @@ interface LandingAboutUsPageProps {
   onLogin: () => void;
   onPricing: () => void;
   onHowItWorks: () => void;
+  onSampleReport: () => void;
+  onApiDocs: () => void;
+  onContact: () => void;
 }
 
-export default function LandingAboutUsPage({ onBack, onStart, onLogin, onPricing, onHowItWorks }: LandingAboutUsPageProps) {
+export default function LandingAboutUsPage({ onBack, onStart, onLogin, onPricing, onHowItWorks, onSampleReport, onApiDocs, onContact }: LandingAboutUsPageProps) {
   return (
     <div className="font-body antialiased overflow-x-hidden bg-cyber-mesh min-h-screen flex flex-col selection:bg-lp-primary selection:text-primary-content">
       <header className="sticky top-0 z-50 w-full border-b border-lp-border-neon bg-lp-surface-dark/80 backdrop-blur-xl">
@@ -310,19 +313,20 @@ export default function LandingAboutUsPage({ onBack, onStart, onLogin, onPricing
             <div>
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Produto</h3>
               <ul className="space-y-3">
-                <li><button onClick={onPricing} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Preços</button></li>
-                <li><button onClick={onHowItWorks} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Como Funciona</button></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Relatório Exemplo</a></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">API Docs</a></li>
+                <li><button onClick={onPricing} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Preços</button></li>
+                <li><button onClick={onBack} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Recursos</button></li>
+                <li><button onClick={onHowItWorks} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Como Funciona</button></li>
+                <li><button onClick={onSampleReport} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Relatório Exemplo</button></li>
+                <li><button onClick={onApiDocs} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">API Docs</button></li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Empresa</h3>
               <ul className="space-y-3">
-                <li><button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-sm text-lp-primary hover:text-white transition-colors cursor-pointer">Sobre Nós</button></li>
+                <li><button onClick={() => {}} className="text-sm text-lp-primary font-bold transition-colors cursor-default text-left">Sobre Nós</button></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Carreiras</a></li>
                 <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Blog de Segurança</a></li>
-                <li><a className="text-sm text-text-muted hover:text-lp-primary transition-colors" href="#">Contato</a></li>
+                <li><button onClick={onContact} className="text-sm text-text-muted hover:text-lp-primary transition-colors cursor-pointer text-left">Contato</button></li>
               </ul>
             </div>
             <div>

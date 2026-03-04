@@ -189,6 +189,20 @@ export const authService = {
   },
 
   /**
+   * Deleta um perfil de usuário (Apenas Admin)
+   */
+  async deleteUser(userId: string) {
+    if (!supabase) return { success: true };
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+    
+    if (error) throw error;
+    return { success: true };
+  },
+
+  /**
    * Upload de avatar para o Supabase Storage
    */
   async uploadAvatar(userId: string, file: File) {

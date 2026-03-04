@@ -217,10 +217,17 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                 )}
               </div>
 
-              <div className="flex flex-col gap-4 sm:gap-5">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleLogin();
+                }}
+                className="flex flex-col gap-4 sm:gap-5"
+              >
                 {/* Social Login */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-2">
                   <button 
+                    type="button"
                     onClick={() => handleSocialLogin('github')}
                     disabled={isLoading}
                     className="flex items-center justify-center gap-3 h-12 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-slate-200 text-sm font-medium transition-all cursor-pointer disabled:opacity-50"
@@ -229,6 +236,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                     GitHub
                   </button>
                   <button 
+                    type="button"
                     onClick={() => handleSocialLogin('google')}
                     disabled={isLoading}
                     className="flex items-center justify-center gap-3 h-12 rounded-lg bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-slate-200 text-sm font-medium transition-all cursor-pointer disabled:opacity-50"
@@ -255,6 +263,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                   <div className="relative flex items-center group">
                     <Mail className="absolute left-4 text-slate-500 size-5 group-focus-within:text-primary transition-colors" />
                     <input 
+                      required
                       type="email" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -269,6 +278,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                   <div className="flex justify-between items-center ml-1">
                     <label className="text-slate-300 text-sm font-medium">Senha</label>
                     <button 
+                      type="button"
                       onClick={() => setView('forgot-password')}
                       className="text-primary text-xs hover:underline cursor-pointer"
                     >
@@ -278,6 +288,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                   <div className="relative flex items-center group">
                     <Lock className="absolute left-4 text-slate-500 size-5 group-focus-within:text-primary transition-colors" />
                     <input 
+                      required
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -297,7 +308,7 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                 {/* Login Button */}
                 <div className="mt-4">
                   <button 
-                    onClick={handleLogin}
+                    type="submit"
                     disabled={isLoading}
                     className="w-full bg-primary hover:bg-primary/90 text-white h-14 rounded-lg font-bold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(19,109,236,0.3)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -307,9 +318,9 @@ export default function LoginPage({ onSwitchToRegister, onLogin, onHome, onHowIt
                 </div>
 
                 <p className="text-center text-slate-500 text-sm mt-4">
-                  Não tem uma conta? <button onClick={onSwitchToRegister} className="text-primary font-semibold hover:underline cursor-pointer">Solicite acesso</button>
+                  Não tem uma conta? <button type="button" onClick={onSwitchToRegister} className="text-primary font-semibold hover:underline cursor-pointer">Solicite acesso</button>
                 </p>
-              </div>
+              </form>
             </motion.div>
           )}
 

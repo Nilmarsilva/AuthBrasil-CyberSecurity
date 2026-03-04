@@ -19,7 +19,9 @@ import {
   Trash2,
   Save,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  CreditCard,
+  KeyRound
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -78,6 +80,32 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   
+  // Stripe Modal States
+  const [isStripeKeysModalOpen, setIsStripeKeysModalOpen] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+
+  const [stripeKeys, setStripeKeys] = useState({
+    publishableKey: 'pk_test_51Mz...',
+    secretKey: 'sk_test_51Mz...',
+    webhookSecret: 'whsec_...'
+  });
+
+  const [plans, setPlans] = useState([
+    { name: 'Plano Gratuito', price: 'R$ 0', id: 'price_free', status: 'Ativo', features: '1 scan/mês, Relatório básico' },
+    { name: 'Plano Profissional', price: 'R$ 97/mês', id: 'price_pro_123', status: 'Ativo', features: 'Scans ilimitados, API Access' },
+    { name: 'Plano Enterprise', price: 'Sob consulta', id: 'price_ent_456', status: 'Ativo', features: 'Suporte 24/7, Custom Scans' },
+  ]);
+
+  const [transactions] = useState([
+    { id: 'tx_1', user: 'João Silva', email: 'joao@exemplo.com', amount: 'R$ 97,00', status: 'Pago', date: '2024-03-04 10:30' },
+    { id: 'tx_2', user: 'Maria Souza', email: 'maria@empresa.com', amount: 'R$ 97,00', status: 'Pago', date: '2024-03-04 08:15' },
+    { id: 'tx_3', user: 'Tech Corp', email: 'admin@techcorp.io', amount: 'R$ 497,00', status: 'Pago', date: '2024-03-03 15:45' },
+    { id: 'tx_4', user: 'Pedro Alvares', email: 'pedro@descobre.br', amount: 'R$ 97,00', status: 'Pendente', date: '2024-03-03 12:00' },
+    { id: 'tx_5', user: 'Ana Costa', email: 'ana@costa.com', amount: 'R$ 97,00', status: 'Pago', date: '2024-03-02 19:20' },
+  ]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [editFormData, setEditFormData] = useState({
     full_name: '',
@@ -279,6 +307,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             { id: 'scans', label: 'Todos os Scans', icon: Activity },
             { id: 'database', label: 'Banco de Dados', icon: Database },
             { id: 'analytics', label: 'Métricas', icon: BarChart },
+            { id: 'stripe', label: 'Pagamentos (Stripe)', icon: CreditCard },
           ].map((item) => (
             <button
               key={item.id}
@@ -593,6 +622,155 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                             <p className="text-[10px] text-slate-500">Apagar registros {'>'} 90 dias</p>
                           </div>
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : activeTab === 'stripe' ? (
+                  <div className="p-8 space-y-8">
+                    {/* Stripe Configuration */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      <div className="lg:col-span-2 space-y-6">
+                        <div className="glass p-6 rounded-2xl border border-slate-800">
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="size-10 rounded-xl bg-[#635bff]/10 flex items-center justify-center text-[#635bff]">
+                              <CreditCard size={24} />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-white">Configuração Stripe</h3>
+                              <p className="text-xs text-slate-500">Gerencie suas chaves de API e webhooks</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Stripe Publishable Key</label>
+                              <div className="relative">
+                                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 size-4" />
+                                <input 
+                                  type="password" 
+                                  value="pk_test_************************"
+                                  readOnly
+                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-400 font-mono"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Stripe Secret Key</label>
+                              <div className="relative">
+                                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 size-4" />
+                                <input 
+                                  type="password" 
+                                  value="sk_test_************************"
+                                  readOnly
+                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-400 font-mono"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Webhook Secret</label>
+                              <div className="relative">
+                                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 size-4" />
+                                <input 
+                                  type="password" 
+                                  value="whsec_************************"
+                                  readOnly
+                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-400 font-mono"
+                                />
+                              </div>
+                            </div>
+                            <div className="pt-4">
+                              <button 
+                                onClick={() => setIsStripeKeysModalOpen(true)}
+                                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-xs transition-all"
+                              >
+                                Atualizar Credenciais
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Subscription Plans Control */}
+                        <div className="glass p-6 rounded-2xl border border-slate-800">
+                          <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Planos de Assinatura</h3>
+                          <div className="space-y-3">
+                            {plans.map((plan, i) => (
+                              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                                <div className="flex items-center gap-4">
+                                  <div className="size-10 rounded-lg bg-slate-900 flex items-center justify-center text-primary">
+                                    <Shield size={20} />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-bold text-white">{plan.name}</p>
+                                    <p className="text-[10px] text-slate-500 font-mono">{plan.id}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-6">
+                                  <div className="text-right">
+                                    <p className="text-sm font-bold text-white">{plan.price}</p>
+                                    <p className="text-[10px] text-emerald-500 font-bold uppercase">{plan.status}</p>
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                      setSelectedPlan(plan);
+                                      setIsPlanModalOpen(true);
+                                    }}
+                                    className="text-slate-500 hover:text-white transition-colors"
+                                  >
+                                    <Settings size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Stripe Stats */}
+                        <div className="glass p-6 rounded-2xl border border-slate-800">
+                          <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Resumo Financeiro</h3>
+                          <div className="space-y-6">
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">MRR (Receita Mensal)</p>
+                              <p className="text-2xl font-black text-white">R$ 12.450,00</p>
+                              <p className="text-[10px] text-emerald-500 font-bold mt-1">+12% em relação ao mês anterior</p>
+                            </div>
+                            <div className="h-px bg-slate-800" />
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Assinantes Ativos</p>
+                              <p className="text-2xl font-black text-white">128</p>
+                              <p className="text-[10px] text-blue-400 font-bold mt-1">85% Retenção</p>
+                            </div>
+                            <div className="h-px bg-slate-800" />
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Churn Rate</p>
+                              <p className="text-2xl font-black text-white">2.4%</p>
+                              <p className="text-[10px] text-emerald-500 font-bold mt-1">Dentro da meta</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Recent Transactions */}
+                        <div className="glass p-6 rounded-2xl border border-slate-800">
+                          <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-widest">Transações Recentes</h3>
+                          <div className="space-y-3">
+                            {transactions.slice(0, 3).map((tx, i) => (
+                              <div key={i} className="flex items-center justify-between text-xs">
+                                <div className="flex flex-col">
+                                  <span className="text-slate-300 font-medium">{tx.user}</span>
+                                  <span className="text-[10px] text-slate-500">{tx.date}</span>
+                                </div>
+                                <span className="text-emerald-400 font-bold">{tx.amount}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <button 
+                            onClick={() => setIsTransactionsModalOpen(true)}
+                            className="w-full mt-4 py-2 text-[10px] font-bold text-slate-500 uppercase hover:text-white transition-colors"
+                          >
+                            Ver todas as transações
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -960,6 +1138,236 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                   className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-all text-xs font-bold"
                 >
                   Fechar Detalhes
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Stripe Keys Modal */}
+      <AnimatePresence>
+        {isStripeKeysModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsStripeKeysModalOpen(false)}
+              className="absolute inset-0 bg-bg-dark/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-800 bg-slate-900/50">
+                <h3 className="text-lg font-bold text-white">Atualizar Credenciais Stripe</h3>
+                <p className="text-xs text-slate-500">Estas chaves são usadas para processar pagamentos reais.</p>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Publishable Key</label>
+                  <input 
+                    type="text"
+                    value={stripeKeys.publishableKey}
+                    onChange={(e) => setStripeKeys({...stripeKeys, publishableKey: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Secret Key</label>
+                  <input 
+                    type="password"
+                    value={stripeKeys.secretKey}
+                    onChange={(e) => setStripeKeys({...stripeKeys, secretKey: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Webhook Secret</label>
+                  <input 
+                    type="password"
+                    value={stripeKeys.webhookSecret}
+                    onChange={(e) => setStripeKeys({...stripeKeys, webhookSecret: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none"
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-950/50 border-t border-slate-800 flex justify-end gap-3">
+                <button 
+                  onClick={() => setIsStripeKeysModalOpen(false)}
+                  className="px-4 py-2 text-slate-400 hover:text-white text-xs font-bold transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsSaving(true);
+                    setTimeout(() => {
+                      setIsSaving(false);
+                      setIsStripeKeysModalOpen(false);
+                    }, 1000);
+                  }}
+                  className="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg transition-all text-xs font-bold"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Salvar Chaves'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Plan Edit Modal */}
+      <AnimatePresence>
+        {isPlanModalOpen && selectedPlan && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPlanModalOpen(false)}
+              className="absolute inset-0 bg-bg-dark/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-800 bg-slate-900/50">
+                <h3 className="text-lg font-bold text-white">Editar Plano: {selectedPlan.name}</h3>
+                <p className="text-xs text-slate-500">Altere os detalhes do plano no Stripe.</p>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Nome do Plano</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedPlan.name}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Preço Exibido</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedPlan.price}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Stripe Price ID</label>
+                  <input 
+                    type="text"
+                    defaultValue={selectedPlan.id}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-400 font-mono focus:border-primary outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Recursos (Separados por vírgula)</label>
+                  <textarea 
+                    defaultValue={selectedPlan.features}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-primary outline-none h-20 resize-none"
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-950/50 border-t border-slate-800 flex justify-end gap-3">
+                <button 
+                  onClick={() => setIsPlanModalOpen(false)}
+                  className="px-4 py-2 text-slate-400 hover:text-white text-xs font-bold transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsSaving(true);
+                    setTimeout(() => {
+                      setIsSaving(false);
+                      setIsPlanModalOpen(false);
+                    }, 1000);
+                  }}
+                  className="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg transition-all text-xs font-bold"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Salvar Plano'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Transactions Modal */}
+      <AnimatePresence>
+        {isTransactionsModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsTransactionsModalOpen(false)}
+              className="absolute inset-0 bg-bg-dark/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="p-6 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Todas as Transações</h3>
+                  <p className="text-xs text-slate-500">Histórico completo de pagamentos processados.</p>
+                </div>
+                <button 
+                  onClick={() => setIsTransactionsModalOpen(false)}
+                  className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800">
+                      <th className="pb-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">ID Transação</th>
+                      <th className="pb-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cliente</th>
+                      <th className="pb-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Valor</th>
+                      <th className="pb-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                      <th className="pb-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((tx, i) => (
+                      <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                        <td className="py-4 text-xs font-mono text-slate-400">{tx.id}</td>
+                        <td className="py-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white">{tx.user}</span>
+                            <span className="text-[10px] text-slate-500">{tx.email}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 text-sm font-bold text-white">{tx.amount}</td>
+                        <td className="py-4">
+                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                            tx.status === 'Pago' ? 'text-emerald-500 bg-emerald-500/10 border border-emerald-500/20' : 'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                          }`}>
+                            {tx.status}
+                          </span>
+                        </td>
+                        <td className="py-4 text-xs text-slate-500">{tx.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="p-6 bg-slate-950/50 border-t border-slate-800 flex justify-end">
+                <button 
+                  onClick={() => setIsTransactionsModalOpen(true)}
+                  className="flex items-center gap-2 px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-all text-xs font-bold"
+                >
+                  Exportar CSV
                 </button>
               </div>
             </motion.div>

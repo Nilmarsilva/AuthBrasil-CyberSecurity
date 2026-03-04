@@ -25,7 +25,7 @@ export default function LandingPricingPage({ onBack, onStart, onLogin, onHowItWo
                 <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
                 <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
               </div>
-              <span className="text-xl font-display font-bold tracking-tight text-text-main">AuthBrasil<span className="text-lp-primary">.io</span></span>
+              <span className="text-xl font-display font-bold tracking-tight text-text-main">AuthBrasil</span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
               <button onClick={onBack} className="text-sm font-medium text-text-muted hover:text-lp-primary transition-colors cursor-pointer">Recursos</button>
@@ -303,8 +303,9 @@ export default function LandingPricingPage({ onBack, onStart, onLogin, onHowItWo
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2 lg:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="flex h-6 w-6 items-center justify-center rounded text-lp-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
+                <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-lp-primary/10 text-lp-primary border border-lp-primary/30">
+                  <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
+                  <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
                 </div>
                 <span className="text-lg font-display font-bold text-white">AuthBrasil</span>
               </div>

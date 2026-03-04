@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Bell, 
   Mail, 
@@ -35,9 +35,22 @@ import {
   Rocket,
   X,
   ArrowLeft,
-  Key
+  Key,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { authService } from '../services/auth';
+
+interface UserProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  company: string | null;
+  role: string | null;
+  phone: string | null;
+  is_admin: boolean;
+}
 
 interface WebhookData {
   id: string;
@@ -75,6 +88,19 @@ interface IntegrationData {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    company: '',
+    role: '',
+    phone: ''
+  });
+
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookData | null>(null);
@@ -93,6 +119,90 @@ export default function SettingsPage() {
     status: 'Conectado',
     type: 'github'
   });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          const profile = await authService.getUserProfile(user.id);
+          const data = {
+            id: user.id,
+            full_name: profile?.full_name || user.user_metadata?.full_name || '',
+            email: user.email || '',
+            avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url || null,
+            company: profile?.company || user.user_metadata?.company || '',
+            role: profile?.role || user.user_metadata?.role || '',
+            phone: profile?.phone || user.user_metadata?.phone || '',
+            is_admin: profile?.is_admin || false
+          };
+          setUserProfile(data);
+          setFormData({
+            full_name: data.full_name,
+            email: data.email,
+            company: data.company,
+            role: data.role,
+            phone: data.phone
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userProfile) return;
+
+    try {
+      setIsSaving(true);
+      const publicUrl = await authService.uploadAvatar(userProfile.id, file);
+      await authService.updateProfile(userProfile.id, { avatar_url: publicUrl });
+      setUserProfile({ ...userProfile, avatar_url: publicUrl });
+      alert('Foto de perfil atualizada!');
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+      alert('Erro ao atualizar foto de perfil.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!userProfile) return;
+
+    try {
+      setIsSaving(true);
+      await authService.updateProfile(userProfile.id, {
+        full_name: formData.full_name,
+        company: formData.company,
+        role: formData.role,
+        phone: formData.phone
+      });
+      setUserProfile({
+        ...userProfile,
+        full_name: formData.full_name,
+        company: formData.company,
+        role: formData.role,
+        phone: formData.phone
+      });
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao salvar perfil:", error);
+      alert('Erro ao salvar alterações.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([
     {
@@ -353,105 +463,159 @@ export default function SettingsPage() {
           <div className="lg:col-span-2 flex flex-col gap-8">
             {activeTab === 'profile' && (
               <>
-                {/* Personal Info Section */}
-                <section className="rounded-2xl border border-border-dark bg-surface-dark-alt/40 backdrop-blur-md p-8 shadow-xl">
-                  <div className="flex items-center gap-3 mb-8">
-                    <User className="text-primary size-6" />
-                    <h2 className="text-xl font-bold text-white">Informações Pessoais</h2>
+                {isLoadingProfile ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 className="size-10 text-primary animate-spin" />
+                    <p className="text-slate-400">Carregando perfil...</p>
                   </div>
-                  
-                  <div className="flex flex-col md:flex-row gap-12">
-                    <div className="flex flex-col items-center gap-4 shrink-0">
-                      <div className="relative group">
-                        <div className="h-32 w-32 rounded-full border-2 border-dashed border-primary/30 p-1">
-                          <div className="h-full w-full rounded-full overflow-hidden bg-slate-800">
-                            <img 
-                              alt="Foto de Perfil" 
-                              className="h-full w-full object-cover" 
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7kCkveSbGXPSQBtyFqjcZK8rSoy2rd610ur-hzNaR3gibnnl0ILaKi0GrMnZhtfZfAZaIU69WDWLiOIzD8vuiDQ7M3KwLv4tsytlSM6BQuDzc698-ZirX9xKjoDQc4f6qZRhcF2xQybWuO52t_jH7mFFKKDabEvdVD29_6KWCXVTCxqffvK3kvtURU1ojP20oBNKY2L0zft35Lj82ZhwHwEa1-SoTqydlyaqLC-U3SAAkNJsi2ORgkGl-ojyyz757IN0dIA86bOg"
-                              referrerPolicy="no-referrer"
+                ) : (
+                  <>
+                    {/* Personal Info Section */}
+                    <section className="rounded-2xl border border-border-dark bg-surface-dark-alt/40 backdrop-blur-md p-8 shadow-xl">
+                      <div className="flex items-center gap-3 mb-8">
+                        <User className="text-primary size-6" />
+                        <h2 className="text-xl font-bold text-white">Informações Pessoais</h2>
+                      </div>
+                      
+                      <div className="flex flex-col md:flex-row gap-12">
+                        <div className="flex flex-col items-center gap-4 shrink-0">
+                          <div className="relative group">
+                            <div className="h-32 w-32 rounded-full border-2 border-dashed border-primary/30 p-1">
+                              <div className="h-full w-full rounded-full overflow-hidden bg-slate-800 flex items-center justify-center">
+                                {userProfile?.avatar_url ? (
+                                  <img 
+                                    alt="Foto de Perfil" 
+                                    className="h-full w-full object-cover" 
+                                    src={userProfile.avatar_url}
+                                    referrerPolicy="no-referrer"
+                                  />
+                                ) : (
+                                  <User className="size-12 text-slate-600" />
+                                )}
+                              </div>
+                            </div>
+                            <div 
+                              onClick={handleAvatarClick}
+                              className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            >
+                              <Camera className="text-white size-8" />
+                            </div>
+                            <input 
+                              type="file" 
+                              ref={fileInputRef} 
+                              className="hidden" 
+                              accept="image/*"
+                              onChange={handleFileChange}
+                              disabled={isSaving}
+                            />
+                          </div>
+                          <button 
+                            onClick={handleAvatarClick}
+                            disabled={isSaving}
+                            className="text-xs font-bold text-primary uppercase tracking-widest hover:text-blue-400 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            {isSaving ? 'Enviando...' : 'Mudar Foto'}
+                          </button>
+                        </div>
+
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="flex flex-col gap-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="full_name">Nome Completo</label>
+                            <input 
+                              className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
+                              id="full_name" 
+                              type="text" 
+                              value={formData.full_name}
+                              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="work_email">E-mail Profissional</label>
+                            <input 
+                              className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all opacity-60 cursor-not-allowed" 
+                              id="work_email" 
+                              type="email" 
+                              value={formData.email}
+                              readOnly
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="company">Empresa</label>
+                            <input 
+                              className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
+                              id="company" 
+                              type="text" 
+                              value={formData.company}
+                              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="role">Cargo</label>
+                            <input 
+                              className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
+                              id="role" 
+                              type="text" 
+                              value={formData.role}
+                              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="phone">Telefone / WhatsApp</label>
+                            <input 
+                              className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
+                              id="phone" 
+                              type="tel" 
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              placeholder="+55 (11) 99999-9999"
                             />
                           </div>
                         </div>
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                          <Camera className="text-white size-8" />
+                      </div>
+                    </section>
+
+                    {/* Account Data Section */}
+                    <section className="rounded-2xl border border-border-dark bg-surface-dark-alt/40 backdrop-blur-md p-6 sm:p-8 shadow-xl">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <Fingerprint className="text-primary size-6" />
+                          <div className="flex flex-col">
+                            <h2 className="text-lg font-bold text-white">Dados da Conta</h2>
+                            <p className="text-xs sm:text-sm text-slate-400">Informações de identificação única do seu perfil.</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-bg-dark border border-border-dark rounded-xl px-4 py-3">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase">Account ID</span>
+                            <span className="text-sm font-mono text-slate-200">{userProfile?.id.substring(0, 8)}-••••-{userProfile?.id.substring(userProfile.id.length - 4)}</span>
+                          </div>
+                          <div className="hidden sm:block h-8 w-px bg-border-dark mx-2"></div>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(userProfile?.id || '');
+                              alert('ID copiado!');
+                            }}
+                            className="flex items-center gap-2 text-primary hover:text-blue-400 transition-colors text-sm font-bold cursor-pointer"
+                          >
+                            <Copy className="size-4" />
+                            Copiar ID
+                          </button>
                         </div>
                       </div>
-                      <button className="text-xs font-bold text-primary uppercase tracking-widest hover:text-blue-400 transition-colors cursor-pointer">
-                        Mudar Foto
+                    </section>
+
+                    <div className="flex justify-end pt-4">
+                      <button 
+                        onClick={handleSaveProfile}
+                        disabled={isSaving}
+                        className="bg-primary hover:bg-blue-600 text-white font-bold py-3 px-10 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(19,91,236,0.6)] hover:shadow-[0_0_25px_-3px_rgba(19,91,236,0.8)] active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {isSaving && <Loader2 className="size-4 animate-spin" />}
+                        {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                       </button>
                     </div>
-
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="full_name">Nome Completo</label>
-                        <input 
-                          className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
-                          id="full_name" 
-                          type="text" 
-                          defaultValue="Carlos Silva"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="work_email">E-mail Profissional</label>
-                        <input 
-                          className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
-                          id="work_email" 
-                          type="email" 
-                          defaultValue="carlos@authbrasil.com"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="company">Empresa</label>
-                        <input 
-                          className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
-                          id="company" 
-                          type="text" 
-                          defaultValue="AuthBrasil Security"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider" htmlFor="role">Cargo</label>
-                        <input 
-                          className="w-full p-3 bg-bg-dark/50 border border-border-dark rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
-                          id="role" 
-                          type="text" 
-                          defaultValue="Security Engineer"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Account Data Section */}
-                <section className="rounded-2xl border border-border-dark bg-surface-dark-alt/40 backdrop-blur-md p-6 sm:p-8 shadow-xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <Fingerprint className="text-primary size-6" />
-                      <div className="flex flex-col">
-                        <h2 className="text-lg font-bold text-white">Dados da Conta</h2>
-                        <p className="text-xs sm:text-sm text-slate-400">Informações de identificação única do seu perfil.</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-bg-dark border border-border-dark rounded-xl px-4 py-3">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Account ID</span>
-                        <span className="text-sm font-mono text-slate-200">AB-8829-••••-4921</span>
-                      </div>
-                      <div className="hidden sm:block h-8 w-px bg-border-dark mx-2"></div>
-                      <button className="flex items-center gap-2 text-primary hover:text-blue-400 transition-colors text-sm font-bold cursor-pointer">
-                        <Copy className="size-4" />
-                        Copiar ID
-                      </button>
-                    </div>
-                  </div>
-                </section>
-
-                <div className="flex justify-end pt-4">
-                  <button className="bg-primary hover:bg-blue-600 text-white font-bold py-3 px-10 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(19,91,236,0.6)] hover:shadow-[0_0_25px_-3px_rgba(19,91,236,0.8)] active:scale-95 cursor-pointer">
-                    Salvar Alterações
-                  </button>
-                </div>
+                  </>
+                )}
               </>
             )}
 

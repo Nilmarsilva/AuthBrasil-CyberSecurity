@@ -10,9 +10,10 @@ import { LandingTermsPage, LandingPrivacyPage, LandingCookiesPage } from './comp
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import DashboardPage from './components/DashboardPage';
+import AdminPage from './components/AdminPage';
 
 export default function App() {
-  const [view, setView] = useState<'landing' | 'pricing' | 'how-it-works' | 'about-us' | 'sample-report' | 'api-docs' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'login' | 'register' | 'dashboard'>('landing');
+  const [view, setView] = useState<'landing' | 'pricing' | 'how-it-works' | 'about-us' | 'sample-report' | 'api-docs' | 'contact' | 'terms' | 'privacy' | 'cookies' | 'login' | 'register' | 'dashboard' | 'admin'>('landing');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -175,6 +176,8 @@ export default function App() {
           onHowItWorks={() => setView('how-it-works')}
           onAboutUs={() => setView('about-us')}
           onPricing={() => setView('pricing')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
         />
       )}
       {view === 'register' && (
@@ -185,10 +188,18 @@ export default function App() {
           onHowItWorks={() => setView('how-it-works')}
           onAboutUs={() => setView('about-us')}
           onPricing={() => setView('pricing')}
+          onTerms={() => setView('terms')}
+          onPrivacy={() => setView('privacy')}
         />
       )}
       {view === 'dashboard' && (
-        <DashboardPage onLogout={() => setView('landing')} />
+        <DashboardPage 
+          onLogout={() => setView('landing')} 
+          onAdmin={() => setView('admin')}
+        />
+      )}
+      {view === 'admin' && (
+        <AdminPage onBack={() => setView('dashboard')} />
       )}
     </div>
   );

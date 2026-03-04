@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   TrendingUp, 
   Shield,
@@ -13,12 +13,36 @@ import {
   Clock
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { scanService, ScanResponse } from '../services/api';
 
 interface OverviewPageProps {
   onNavigate?: (view: any) => void;
 }
 
 export default function OverviewPage({ onNavigate }: OverviewPageProps) {
+  // ESTADO PARA DADOS REAIS DA API
+  // Quando você conectar o backend, use este estado para armazenar os scans
+  const [scans, setScans] = useState<ScanResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // FUNÇÃO PARA BUSCAR DADOS DO SEU BACKEND FASTAPI
+    const fetchScans = async () => {
+      try {
+        setIsLoading(true);
+        // Chamada para o seu endpoint GET /scans/
+        const data = await scanService.listScans(0, 5);
+        setScans(data);
+      } catch (error) {
+        console.error("Erro ao buscar scans da API:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // fetchScans(); // Descomente esta linha quando a API estiver online
+  }, []);
+
   const recentActivities = [
     { id: 1, type: 'scan', target: 'authbrasil.com.br', status: 'concluído', time: 'Há 2 horas', score: 72 },
     { id: 2, type: 'report', target: 'Relatório Mensal', status: 'exportado', time: 'Há 5 horas' },
@@ -130,10 +154,15 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Atividade Recente */}
         <div className="lg:col-span-5 flex flex-col gap-6">
           <h3 className="text-lg font-bold text-white px-2">Atividade Recente</h3>
           <div className="glassmorphism rounded-2xl overflow-hidden">
+            {/* 
+                DICA DE INTEGRAÇÃO:
+                Aqui você pode mapear os dados reais vindos da sua API:
+                {scans.length > 0 ? scans.map(...) : recentActivities.map(...)}
+            */}
             {recentActivities.map((activity, i) => (
               <div key={activity.id} className={`p-4 flex items-center gap-4 hover:bg-white/5 transition-colors ${i !== recentActivities.length - 1 ? 'border-b border-white/5' : ''}`}>
                 <div className={`p-2 rounded-lg ${

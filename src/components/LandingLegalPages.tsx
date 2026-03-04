@@ -27,10 +27,11 @@ const LegalLayout = ({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={onBack}>
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/30">
-              <Shield className="size-5" />
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-lp-primary/10 text-lp-primary border border-lp-primary/30">
+              <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
+              <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
             </div>
-            <span className="text-xl font-display font-bold tracking-tight text-white">AuthBrasil<span className="text-primary">.io</span></span>
+            <span className="text-xl font-display font-bold tracking-tight text-text-main">AuthBrasil</span>
           </div>
           <button onClick={onBack} className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-primary transition-colors cursor-pointer">
             <ArrowLeft className="size-4" /> Voltar
@@ -63,8 +64,9 @@ const LegalLayout = ({
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-6 w-6 items-center justify-center rounded text-lp-primary">
-                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-lp-primary/10 text-lp-primary border border-lp-primary/30">
+                <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
+                <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
               </div>
               <span className="text-lg font-display font-bold text-white">AuthBrasil</span>
             </div>
@@ -114,7 +116,7 @@ export function LandingTermsPage(props: Omit<LandingLegalPageProps, 'title' | 'l
       <div className="space-y-8 text-slate-300">
         <section>
           <h2 className="text-white flex items-center gap-2"><FileText className="size-5 text-primary" /> 1. Aceitação dos Termos</h2>
-          <p>Ao acessar e utilizar a plataforma AuthBrasil.io, você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não deverá utilizar nossos serviços.</p>
+          <p>Ao acessar e utilizar a plataforma AuthBrasil, você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não deverá utilizar nossos serviços.</p>
         </section>
 
         <section>

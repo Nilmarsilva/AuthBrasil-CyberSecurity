@@ -93,10 +93,11 @@ export default function LandingApiDocsPage({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={onBack}>
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/30">
-                <Shield className="size-5" />
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-lp-primary/10 text-lp-primary border border-lp-primary/30">
+                <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
+                <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
               </div>
-              <span className="text-xl font-display font-bold tracking-tight text-white">AuthBrasil<span className="text-primary">.io</span></span>
+              <span className="text-xl font-display font-bold tracking-tight text-text-main">AuthBrasil</span>
               <span className="ml-2 px-2 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-700">Docs</span>
             </div>
             
@@ -386,8 +387,9 @@ export default function LandingApiDocsPage({
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2 lg:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="flex h-6 w-6 items-center justify-center rounded text-lp-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
+                <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-lp-primary/10 text-lp-primary border border-lp-primary/30">
+                  <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
+                  <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
                 </div>
                 <span className="text-lg font-display font-bold text-white">AuthBrasil</span>
               </div>
@@ -421,7 +423,7 @@ export default function LandingApiDocsPage({
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-text-muted text-center md:text-left">© 2026 AuthBrasil CyberSecurity Ltda.</p>
+            <p className="text-xs text-text-muted text-center md:text-left">© 2026 AuthBrasil.</p>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-900/20 border border-green-800/50">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               <span className="text-xs text-green-400 font-mono">ALL SYSTEMS OPERATIONAL</span>

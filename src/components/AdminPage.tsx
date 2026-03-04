@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { authService } from '../services/auth';
+import { scanService, Scan } from '../services/scanService';
 
 interface AdminPageProps {
   onBack: () => void;
@@ -41,6 +42,7 @@ interface UserProfile {
 export default function AdminPage({ onBack }: AdminPageProps) {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [scans, setScans] = useState<Scan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -71,9 +73,27 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     }
   };
 
+  const fetchScans = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await scanService.getAllScans();
+      setScans(data || []);
+    } catch (err: any) {
+      console.error("Erro ao buscar scans:", err);
+      setError(err.message || "Erro ao carregar lista de scans.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (activeTab === 'users') {
+      fetchUsers();
+    } else if (activeTab === 'scans') {
+      fetchScans();
+    }
+  }, [activeTab]);
 
   const handleManageUser = (user: UserProfile) => {
     setSelectedUser(user);
@@ -227,12 +247,14 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             {/* Main Table Area */}
             <div className="glass rounded-2xl border border-slate-800 overflow-hidden">
               <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h2 className="text-xl font-bold font-display">Lista de Usuários</h2>
+                <h2 className="text-xl font-bold font-display">
+                  {activeTab === 'users' ? 'Lista de Usuários' : 'Histórico Global de Scans'}
+                </h2>
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 size-4" />
                   <input 
                     type="text" 
-                    placeholder="Buscar usuário..."
+                    placeholder={activeTab === 'users' ? "Buscar usuário..." : "Buscar URL ou empresa..."}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary transition-colors"
@@ -244,7 +266,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-4">
                     <Loader2 className="size-10 text-primary animate-spin" />
-                    <p className="text-slate-400">Carregando usuários do Supabase...</p>
+                    <p className="text-slate-400">Carregando dados do Supabase...</p>
                   </div>
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -255,7 +277,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                       <p className="text-primary text-[10px] mt-4 uppercase font-bold">Dica: Verifique se as políticas RLS no Supabase estão corretas.</p>
                     </div>
                   </div>
-                ) : (
+                ) : activeTab === 'users' ? (
                   <table className="w-full text-left">
                     <thead className="bg-slate-900/50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
                       <tr>
@@ -324,6 +346,75 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                         <tr>
                           <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
                             Nenhum usuário encontrado.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                ) : (
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-900/50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
+                      <tr>
+                        <th className="px-6 py-4">Alvo / URL</th>
+                        <th className="px-6 py-4">Usuário / Empresa</th>
+                        <th className="px-6 py-4">Score</th>
+                        <th className="px-6 py-4">Data</th>
+                        <th className="px-6 py-4">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800">
+                      {scans.filter(s => 
+                        s.target_url.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        s.profiles?.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        s.profiles?.company.toLowerCase().includes(searchTerm.toLowerCase())
+                      ).length > 0 ? scans.filter(s => 
+                        s.target_url.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        s.profiles?.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        s.profiles?.company.toLowerCase().includes(searchTerm.toLowerCase())
+                      ).map((scan) => (
+                        <tr key={scan.id} className="hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-white truncate max-w-[200px]">{scan.target_url}</span>
+                              <span className="text-[10px] text-slate-500 font-mono">ID: {scan.id.substring(0, 8)}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <span className="text-sm text-slate-300 font-medium">{scan.profiles?.full_name || 'Desconhecido'}</span>
+                              <span className="text-xs text-slate-500">{scan.profiles?.company || 'N/A'}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className={`size-8 rounded-lg flex items-center justify-center font-black text-xs ${
+                                scan.score >= 80 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                scan.score >= 60 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                'bg-red-500/10 text-red-400 border border-red-500/20'
+                              }`}>
+                                {scan.score}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-xs text-slate-400">
+                              {new Date(scan.created_at).toLocaleDateString('pt-BR')} {new Date(scan.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${
+                              scan.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                              scan.status === 'running' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                              'bg-red-500/10 text-red-400 border-red-500/20'
+                            }`}>
+                              {scan.status === 'completed' ? 'Concluído' : scan.status === 'running' ? 'Em curso' : 'Falhou'}
+                            </span>
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
+                            Nenhum scan encontrado.
                           </td>
                         </tr>
                       )}

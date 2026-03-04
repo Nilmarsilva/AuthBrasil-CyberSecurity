@@ -157,6 +157,30 @@ export const testSupabaseConnection = async () => {
  * CREATE TRIGGER on_auth_user_created
  *   AFTER INSERT ON auth.users
  *   FOR EACH ROW EXECUTE FUNCTION public.handle_first_user_admin();
+ * 
+ * -- TABELA DE SCANS
+ * CREATE TABLE IF NOT EXISTS public.scans (
+ *   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+ *   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+ *   target_url text NOT NULL,
+ *   score integer DEFAULT 0,
+ *   status text DEFAULT 'completed',
+ *   vulnerabilities jsonb DEFAULT '[]'::jsonb,
+ *   created_at timestamp with time zone DEFAULT now()
+ * );
+ * 
+ * -- Habilitar RLS para Scans
+ * ALTER TABLE public.scans ENABLE ROW LEVEL SECURITY;
+ * 
+ * -- Políticas para Scans
+ * CREATE POLICY "Usuários podem ver seus próprios scans" ON public.scans
+ *   FOR SELECT USING (auth.uid() = user_id);
+ * 
+ * CREATE POLICY "Usuários podem inserir seus próprios scans" ON public.scans
+ *   FOR INSERT WITH CHECK (auth.uid() = user_id);
+ * 
+ * CREATE POLICY "Admins podem ver todos os scans" ON public.scans
+ *   FOR SELECT USING (public.is_admin());
  */
 
 /**

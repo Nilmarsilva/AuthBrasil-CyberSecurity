@@ -14,9 +14,13 @@ import {
   BrainCircuit,
   CheckCircle2,
   Loader2,
-  X
+  X,
+  AlertTriangle,
+  ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { scanService, Scan } from '../services/scanService';
+import { authService } from '../services/auth';
 
 interface AnalysesPageProps {
   target?: string | null;
@@ -41,7 +45,28 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
   const [scanTarget, setScanTarget] = useState(target || '');
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [userScans, setUserScans] = useState<Scan[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const lastScrollY = useRef(0);
+
+  const fetchHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const user = await authService.getCurrentUser();
+      if (user) {
+        const data = await scanService.getUserScans(user.id);
+        setUserScans(data);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar histórico:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   useEffect(() => {
     const mainElement = document.querySelector('main');
@@ -120,13 +145,36 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
     }
   ];
 
-  const handleStartScan = () => {
+  const handleStartScan = async () => {
     if (!scanTarget) return;
     setIsScanning(true);
-    setTimeout(() => {
+    
+    try {
+      // Simulando o tempo de scan
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      const user = await authService.getCurrentUser();
+      if (user) {
+        // Salvar no Supabase
+        await scanService.createScan({
+          user_id: user.id,
+          target_url: scanTarget,
+          score: 72, // Score simulado
+          status: 'completed',
+          vulnerabilities: vulnerabilities // Usando as vulnerabilidades mockadas por enquanto
+        });
+        
+        // Atualizar histórico local
+        fetchHistory();
+        
+        alert(`Varredura concluída para: ${scanTarget}`);
+      }
+    } catch (error: any) {
+      console.error("Erro ao salvar scan:", error);
+      alert(`Erro ao salvar scan: ${error.message}`);
+    } finally {
       setIsScanning(false);
-      alert(`Varredura concluída para: ${scanTarget}`);
-    }, 3000);
+    }
   };
 
   const handleExportPDF = () => {

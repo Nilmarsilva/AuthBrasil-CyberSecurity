@@ -90,8 +90,16 @@ export const testSupabaseConnection = async () => {
  *   updated_at timestamp with time zone DEFAULT now()
  * );
  * 
+ * -- GARANTIR QUE A COLUNA PHONE EXISTE (Caso você já tenha criado a tabela antes)
+ * ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
+ * 
  * -- Habilitar RLS (Row Level Security)
  * ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ * 
+ * -- Remover políticas antigas para evitar conflitos
+ * DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.profiles;
+ * DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.profiles;
+ * DROP POLICY IF EXISTS "Admins podem ver todos os perfis" ON public.profiles;
  * 
  * -- Criar políticas de acesso
  * CREATE POLICY "Usuários podem ver seu próprio perfil" ON public.profiles
@@ -100,13 +108,19 @@ export const testSupabaseConnection = async () => {
  * CREATE POLICY "Usuários podem atualizar seu próprio perfil" ON public.profiles
  *   FOR UPDATE USING (auth.uid() = id);
  * 
- * -- Política para Admins verem todos os perfis
- * CREATE POLICY "Admins podem ver todos os perfis" ON public.profiles
- *   FOR SELECT USING (
- *     EXISTS (
- *       SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true
- *     )
+ * -- Política para Admins verem todos os perfis (USANDO UMA FUNÇÃO PARA EVITAR RECURSÃO)
+ * CREATE OR REPLACE FUNCTION public.is_admin()
+ * RETURNS boolean AS $$
+ * BEGIN
+ *   RETURN EXISTS (
+ *     SELECT 1 FROM public.profiles
+ *     WHERE id = auth.uid() AND is_admin = true
  *   );
+ * END;
+ * $$ LANGUAGE plpgsql SECURITY DEFINER;
+ * 
+ * CREATE POLICY "Admins podem ver todos os perfis" ON public.profiles
+ *   FOR SELECT USING (public.is_admin());
  * 
  * -- Criar bucket para avatares
  * -- Vá em Storage > New Bucket > Nome: 'avatars' > Public: true

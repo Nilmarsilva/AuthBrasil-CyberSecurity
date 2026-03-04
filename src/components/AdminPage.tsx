@@ -38,16 +38,19 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const data = await authService.getAllUsers();
         setUsers(data || []);
-      } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
+      } catch (err: any) {
+        console.error("Erro ao buscar usuários:", err);
+        setError(err.message || "Erro ao carregar lista de usuários.");
       } finally {
         setIsLoading(false);
       }
@@ -170,6 +173,15 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                   <div className="flex flex-col items-center justify-center py-20 gap-4">
                     <Loader2 className="size-10 text-primary animate-spin" />
                     <p className="text-slate-400">Carregando usuários do Supabase...</p>
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <ShieldAlert className="size-10 text-red-500" />
+                    <div className="text-center">
+                      <p className="text-white font-bold">Erro de Permissão ou Banco</p>
+                      <p className="text-slate-500 text-sm max-w-md mt-1">{error}</p>
+                      <p className="text-primary text-[10px] mt-4 uppercase font-bold">Dica: Verifique se as políticas RLS no Supabase estão corretas.</p>
+                    </div>
                   </div>
                 ) : (
                   <table className="w-full text-left">

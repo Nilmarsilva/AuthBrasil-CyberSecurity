@@ -40,10 +40,10 @@ export const authService = {
       options: {
         data: {
           full_name: fullName,
-          display_name: fullName, // Alguns provedores usam display_name
           company: company || '',
           role: role || '',
-          phone: phone || ''
+          phone: phone || '',
+          is_admin: false // O trigger do banco decidirá se é true ou false
         }
       }
     });
@@ -126,13 +126,39 @@ export const authService = {
    */
   async updateProfile(userId: string, updates: { full_name?: string, company?: string, role?: string, phone?: string, avatar_url?: string }) {
     if (!supabase) return { success: true };
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', userId);
     
-    if (error) throw error;
-    return data;
+    try {
+      // 1. Atualiza a tabela pública 'profiles' (usando upsert para garantir que o registro exista)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          ...updates,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (profileError) throw profileError;
+
+      // 2. Sincroniza com os metadados do Supabase Auth (para o dashboard do Supabase ficar bonito)
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          full_name: updates.full_name,
+          company: updates.company,
+          role: updates.role,
+          phone: updates.phone,
+          avatar_url: updates.avatar_url
+        }
+      });
+
+      if (authError) {
+        console.warn("Perfil atualizado, mas houve um erro ao sincronizar metadados de Auth:", authError.message);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      throw error;
+    }
   },
 
   /**
@@ -141,14 +167,25 @@ export const authService = {
   async getAllUsers() {
     if (!supabase) return [];
     
-    // Buscamos da tabela profiles que contém os dados extras
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('updated_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
+    try {
+      // Buscamos da tabela profiles. 
+      // Nota: No Supabase, para listar e-mails de auth.users, precisaríamos de uma View ou Edge Function,
+      // pois a tabela auth.users é protegida. Por enquanto, usamos a profiles que é nossa fonte de verdade.
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('updated_at', { ascending: false });
+      
+      if (error) {
+        console.error("Erro na query getAllUsers:", error);
+        throw error;
+      }
+      
+      return data || [];
+    } catch (err) {
+      console.error("Erro catastrófico em getAllUsers:", err);
+      throw err;
+    }
   },
 
   /**

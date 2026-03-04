@@ -21,7 +21,9 @@ import {
   Shield,
   AlertTriangle,
   CreditCard,
-  KeyRound
+  KeyRound,
+  Menu,
+  X as CloseIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -79,6 +81,9 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   // Scan Details Modal State
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  
+  // Mobile Menu State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Stripe Modal States
   const [isStripeKeysModalOpen, setIsStripeKeysModalOpen] = useState(false);
@@ -270,20 +275,27 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   return (
     <div className="min-h-screen bg-bg-dark text-slate-100 flex flex-col">
       {/* Admin Header */}
-      <header className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-50">
+      <header className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 lg:px-8 sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
+          >
+            {isMobileMenuOpen ? <CloseIcon size={20} /> : <Menu size={20} />}
+          </button>
+          
+          <button 
             onClick={onBack}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
+            className="hidden sm:block p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
           >
             <ArrowLeft size={20} />
           </button>
-          <div className="h-6 w-px bg-slate-800" />
+          <div className="hidden sm:block h-6 w-px bg-slate-800" />
           <div className="flex items-center gap-2">
             <div className="size-8 rounded bg-primary/20 border border-primary/30 flex items-center justify-center">
               <span className="material-symbols-outlined text-primary text-xl">admin_panel_settings</span>
             </div>
-            <h1 className="font-display font-bold text-lg tracking-tight">Painel Administrativo</h1>
+            <h1 className="font-display font-bold text-sm sm:text-lg tracking-tight">Painel Administrativo</h1>
           </div>
         </div>
         
@@ -298,9 +310,33 @@ export default function AdminPage({ onBack }: AdminPageProps) {
         </div>
       </header>
 
-      <div className="flex-1 flex">
-        {/* Admin Sidebar */}
-        <aside className="w-64 border-r border-slate-800 p-4 hidden lg:flex flex-col gap-2">
+      <div className="flex-1 flex relative">
+        {/* Mobile Sidebar Overlay */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-40 bg-bg-dark/60 backdrop-blur-sm lg:hidden"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Admin Sidebar (Responsive) */}
+        <aside className={`
+          fixed lg:static inset-y-0 left-0 z-40 w-64 border-r border-slate-800 p-4 bg-slate-950 lg:bg-transparent
+          transform transition-transform duration-300 ease-in-out lg:transform-none flex flex-col gap-2
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <div className="flex items-center justify-between lg:hidden mb-6 px-4">
+            <span className="text-xs font-bold text-primary uppercase tracking-widest">Menu Admin</span>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-500">
+              <CloseIcon size={18} />
+            </button>
+          </div>
+          
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-2">Gerenciamento</p>
           {[
             { id: 'users', label: 'Usuários', icon: Users },
@@ -311,7 +347,10 @@ export default function AdminPage({ onBack }: AdminPageProps) {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setIsMobileMenuOpen(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === item.id 
                   ? 'bg-primary/10 text-primary border border-primary/20' 
@@ -322,10 +361,20 @@ export default function AdminPage({ onBack }: AdminPageProps) {
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           ))}
+
+          <div className="mt-auto pt-6 border-t border-slate-800 lg:hidden">
+            <button 
+              onClick={onBack}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all"
+            >
+              <ArrowLeft size={18} />
+              <span className="text-sm font-medium">Sair do Admin</span>
+            </button>
+          </div>
         </aside>
 
         {/* Admin Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
           <div className="max-w-6xl mx-auto">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -349,24 +398,26 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             </div>
 
             {/* Main Table Area */}
-            <div className="glass rounded-2xl border border-slate-800 overflow-hidden">
-              <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h2 className="text-xl font-bold font-display">
-                  {activeTab === 'users' ? 'Lista de Usuários' : 'Histórico Global de Scans'}
-                </h2>
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 size-4" />
-                  <input 
-                    type="text" 
-                    placeholder={activeTab === 'users' ? "Buscar usuário..." : "Buscar URL ou empresa..."}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary transition-colors"
-                  />
+            <div className={`${(activeTab === 'users' || activeTab === 'scans') ? 'glass rounded-2xl border border-slate-800 overflow-hidden' : ''}`}>
+              {(activeTab === 'users' || activeTab === 'scans') && (
+                <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <h2 className="text-xl font-bold font-display">
+                    {activeTab === 'users' ? 'Lista de Usuários' : 'Histórico Global de Scans'}
+                  </h2>
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 size-4" />
+                    <input 
+                      type="text" 
+                      placeholder={activeTab === 'users' ? "Buscar usuário..." : "Buscar URL ou empresa..."}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="overflow-x-auto">
+              <div className={(activeTab === 'users' || activeTab === 'scans') ? 'overflow-x-auto' : ''}>
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-4">
                     <Loader2 className="size-10 text-primary animate-spin" />
@@ -386,8 +437,8 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                     <thead className="bg-slate-900/50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
                       <tr>
                         <th className="px-6 py-4">Usuário</th>
-                        <th className="px-6 py-4">Empresa / Cargo</th>
-                        <th className="px-6 py-4">Contato</th>
+                        <th className="px-6 py-4 hidden md:table-cell">Empresa / Cargo</th>
+                        <th className="px-6 py-4 hidden sm:table-cell">Contato</th>
                         <th className="px-6 py-4">Tipo</th>
                         <th className="px-6 py-4">Ações</th>
                       </tr>
@@ -397,26 +448,26 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                         <tr key={user.id} className="hover:bg-white/5 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="size-10 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
+                              <div className="size-10 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                                 {user.avatar_url ? (
                                   <img src={user.avatar_url} alt={user.full_name} className="size-full object-cover" referrerPolicy="no-referrer" />
                                 ) : (
                                   <UserIcon className="size-5 text-slate-500" />
                                 )}
                               </div>
-                              <div>
-                                <p className="text-sm font-bold text-white">{user.full_name || 'Sem nome'}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-white truncate">{user.full_name || 'Sem nome'}</p>
                                 <p className="text-[10px] text-slate-500 font-mono">{user.id.substring(0, 8)}...</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 hidden md:table-cell">
                             <div className="flex flex-col">
                               <span className="text-sm text-slate-300 font-medium">{user.company || 'N/A'}</span>
                               <span className="text-xs text-slate-500">{user.role || 'N/A'}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 hidden sm:table-cell">
                             <div className="flex flex-col gap-1">
                               {user.phone && (
                                 <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -461,9 +512,9 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                     <thead className="bg-slate-900/50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
                       <tr>
                         <th className="px-6 py-4">Alvo / URL</th>
-                        <th className="px-6 py-4">Usuário / Empresa</th>
+                        <th className="px-6 py-4 hidden sm:table-cell">Usuário / Empresa</th>
                         <th className="px-6 py-4">Score</th>
-                        <th className="px-6 py-4">Data</th>
+                        <th className="px-6 py-4 hidden md:table-cell">Data</th>
                         <th className="px-6 py-4">Status</th>
                       </tr>
                     </thead>
@@ -483,12 +534,12 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                           className="hover:bg-white/5 transition-colors cursor-pointer group"
                         >
                           <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-white truncate max-w-[200px] group-hover:text-primary transition-colors">{scan.target_url}</span>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-[250px] group-hover:text-primary transition-colors">{scan.target_url}</span>
                               <span className="text-[10px] text-slate-500 font-mono">ID: {scan.id.substring(0, 8)}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 hidden sm:table-cell">
                             <div className="flex flex-col">
                               <span className="text-sm text-slate-300 font-medium">{scan.profiles?.full_name || 'Desconhecido'}</span>
                               <span className="text-xs text-slate-500">{scan.profiles?.company || 'N/A'}</span>
@@ -505,7 +556,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 hidden md:table-cell">
                             <span className="text-xs text-slate-400">
                               {new Date(scan.created_at).toLocaleDateString('pt-BR')} {new Date(scan.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                             </span>
@@ -567,19 +618,19 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                           { name: 'scans', description: 'Histórico de varreduras de segurança', count: dbStats.scansCount, icon: Activity },
                           { name: 'webhooks', description: 'Configurações de integração externa', count: 0, icon: Settings },
                         ].map((table, i) => (
-                          <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-primary/30 transition-all group">
+                          <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-primary/30 transition-all group gap-4">
                             <div className="flex items-center gap-4">
-                              <div className="size-10 rounded-lg bg-slate-900 flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+                              <div className="size-10 rounded-lg bg-slate-900 flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors shrink-0">
                                 <table.icon size={20} />
                               </div>
-                              <div>
-                                <p className="text-sm font-bold text-white font-mono">public.{table.name}</p>
-                                <p className="text-xs text-slate-500">{table.description}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-white font-mono truncate">public.{table.name}</p>
+                                <p className="text-xs text-slate-500 truncate">{table.description}</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-6">
-                              <div className="text-right">
-                                <p className="text-lg font-black text-white">{table.count}</p>
+                            <div className="flex items-center justify-between sm:justify-end gap-6 border-t border-slate-800/50 sm:border-0 pt-3 sm:pt-0">
+                              <div className="text-left sm:text-right">
+                                <p className="text-lg font-black text-white leading-none">{table.count}</p>
                                 <p className="text-[10px] font-bold text-slate-500 uppercase">Registros</p>
                               </div>
                               <button className="p-2 hover:bg-slate-900 rounded-lg text-slate-600 hover:text-white transition-all">
@@ -694,19 +745,19 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                           <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Planos de Assinatura</h3>
                           <div className="space-y-3">
                             {plans.map((plan, i) => (
-                              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                              <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 gap-4">
                                 <div className="flex items-center gap-4">
-                                  <div className="size-10 rounded-lg bg-slate-900 flex items-center justify-center text-primary">
+                                  <div className="size-10 rounded-lg bg-slate-900 flex items-center justify-center text-primary shrink-0">
                                     <Shield size={20} />
                                   </div>
-                                  <div>
-                                    <p className="text-sm font-bold text-white">{plan.name}</p>
-                                    <p className="text-[10px] text-slate-500 font-mono">{plan.id}</p>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-bold text-white truncate">{plan.name}</p>
+                                    <p className="text-[10px] text-slate-500 font-mono truncate">{plan.id}</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
-                                  <div className="text-right">
-                                    <p className="text-sm font-bold text-white">{plan.price}</p>
+                                <div className="flex items-center justify-between sm:justify-end gap-6 border-t border-slate-800/50 sm:border-0 pt-3 sm:pt-0">
+                                  <div className="text-left sm:text-right">
+                                    <p className="text-sm font-bold text-white leading-none">{plan.price}</p>
                                     <p className="text-[10px] text-emerald-500 font-bold uppercase">{plan.status}</p>
                                   </div>
                                   <button 
@@ -807,33 +858,35 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                       {/* Vulnerability Distribution */}
                       <div className="glass p-6 rounded-2xl border border-slate-800 min-h-[350px]">
                         <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Distribuição de Riscos</h3>
-                        <div className="h-64 w-full flex items-center min-w-0">
-                          <ResponsiveContainer width="100%" height="100%" debounce={100}>
-                            <PieChart>
-                              <Pie
-                                data={getVulnerabilityData()}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                              >
-                                {getVulnerabilityData().map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                              </Pie>
-                              <Tooltip 
-                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                              />
-                            </PieChart>
-                          </ResponsiveContainer>
-                          <div className="space-y-2 pr-8">
+                        <div className="flex flex-col sm:flex-row items-center gap-8 min-w-0">
+                          <div className="h-64 w-full sm:w-1/2">
+                            <ResponsiveContainer width="100%" height="100%" debounce={100}>
+                              <PieChart>
+                                <Pie
+                                  data={getVulnerabilityData()}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={60}
+                                  outerRadius={80}
+                                  paddingAngle={5}
+                                  dataKey="value"
+                                >
+                                  {getVulnerabilityData().map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                                <Tooltip 
+                                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                                />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="space-y-3 w-full sm:w-1/2">
                             {getVulnerabilityData().map((item, i) => (
-                              <div key={i} className="flex items-center gap-2">
-                                <div className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">{item.name}</span>
-                                <span className="text-xs font-bold text-white ml-auto">{item.value}</span>
+                              <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-slate-950/50 border border-slate-800/50">
+                                <div className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.name}</span>
+                                <span className="text-sm font-black text-white ml-auto">{item.value}</span>
                               </div>
                             ))}
                           </div>
@@ -847,14 +900,14 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                         <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Top 5 Alvos Escaneados</h3>
                         <div className="space-y-4">
                           {getTopTargets().map((target, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-                              <div className="flex items-center gap-3">
-                                <div className="size-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 gap-4">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="size-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                                   {i + 1}
                                 </div>
-                                <span className="text-sm text-slate-300 font-mono truncate max-w-[300px]">{target.url}</span>
+                                <span className="text-sm text-slate-300 font-mono truncate">{target.url}</span>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-xs font-bold text-white">{target.count}</span>
                                 <span className="text-[10px] text-slate-500 uppercase">Scans</span>
                               </div>
@@ -1012,27 +1065,27 @@ export default function AdminPage({ onBack }: AdminPageProps) {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 bg-slate-950/50 border-t border-slate-800 flex justify-between items-center">
+              <div className="p-6 bg-slate-950/50 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <button 
                   onClick={handleDeleteUser}
                   disabled={isSaving}
-                  className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all text-xs font-bold disabled:opacity-50"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all text-xs font-bold disabled:opacity-50"
                 >
                   <Trash2 size={16} />
                   Excluir Perfil
                 </button>
                 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
                   <button 
                     onClick={() => setIsEditModalOpen(false)}
-                    className="px-4 py-2 text-slate-400 hover:text-white text-xs font-bold transition-colors"
+                    className="w-full sm:w-auto px-4 py-2 text-slate-400 hover:text-white text-xs font-bold transition-colors"
                   >
                     Cancelar
                   </button>
                   <button 
                     onClick={handleUpdateUser}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg transition-all text-xs font-bold shadow-lg shadow-primary/20 disabled:opacity-50"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg transition-all text-xs font-bold shadow-lg shadow-primary/20 disabled:opacity-50"
                   >
                     {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                     Salvar Alterações

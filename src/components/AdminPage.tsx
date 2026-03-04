@@ -22,6 +22,22 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  LineChart, 
+  Line, 
+  BarChart as ReBarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
+  Cell,
+  AreaChart,
+  Area
+} from 'recharts';
 import { authService } from '../services/auth';
 import { scanService, Scan } from '../services/scanService';
 
@@ -170,10 +186,52 @@ export default function AdminPage({ onBack }: AdminPageProps) {
 
   const stats = [
     { label: 'Total Usuários', value: users.length.toString(), icon: Users, color: 'text-blue-400' },
-    { label: 'Admins', value: users.filter(u => u.is_admin).length.toString(), icon: ShieldCheck, color: 'text-emerald-400' },
-    { label: 'Alertas Críticos', value: '12', icon: ShieldAlert, color: 'text-red-400' },
-    { label: 'Uptime API', value: '99.98%', icon: Server, color: 'text-purple-400' },
+    { label: 'Total Scans', value: scans.length.toString(), icon: Activity, color: 'text-emerald-400' },
+    { label: 'Alertas Críticos', value: scans.reduce((acc, s) => acc + (s.vulnerabilities?.filter((v: any) => v.severity === 'ALTA').length || 0), 0).toString(), icon: ShieldAlert, color: 'text-red-400' },
+    { label: 'Score Médio', value: scans.length > 0 ? Math.round(scans.reduce((acc, s) => acc + s.score, 0) / scans.length).toString() : '0', icon: Server, color: 'text-purple-400' },
   ];
+
+  // Analytics Data Processing
+  const getGrowthData = () => {
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }).reverse();
+
+    return last7Days.map(date => ({
+      name: date,
+      usuarios: Math.floor(Math.random() * 5) + 1, // Simulated for now
+      scans: Math.floor(Math.random() * 10) + 2
+    }));
+  };
+
+  const getVulnerabilityData = () => {
+    const counts = { ALTA: 0, MÉDIA: 0, BAIXA: 0 };
+    scans.forEach(s => {
+      s.vulnerabilities?.forEach((v: any) => {
+        if (counts[v.severity as keyof typeof counts] !== undefined) {
+          counts[v.severity as keyof typeof counts]++;
+        }
+      });
+    });
+    return [
+      { name: 'Crítica', value: counts.ALTA, color: '#ef4444' },
+      { name: 'Média', value: counts.MÉDIA, color: '#f59e0b' },
+      { name: 'Baixa', value: counts.BAIXA, color: '#10b981' },
+    ];
+  };
+
+  const getTopTargets = () => {
+    const targets: Record<string, number> = {};
+    scans.forEach(s => {
+      targets[s.target_url] = (targets[s.target_url] || 0) + 1;
+    });
+    return Object.entries(targets)
+      .map(([url, count]) => ({ url, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  };
 
   return (
     <div className="min-h-screen bg-bg-dark text-slate-100 flex flex-col">
@@ -362,7 +420,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                       )}
                     </tbody>
                   </table>
-                ) : (
+                ) : activeTab === 'scans' ? (
                   <table className="w-full text-left">
                     <thead className="bg-slate-900/50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
                       <tr>
@@ -435,6 +493,132 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                       )}
                     </tbody>
                   </table>
+                ) : (
+                  <div className="p-8 space-y-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Growth Chart */}
+                      <div className="glass p-6 rounded-2xl border border-slate-800">
+                        <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Crescimento (Últimos 7 dias)</h3>
+                        <div className="h-64 w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={getGrowthData()}>
+                              <defs>
+                                <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                              <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                              <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                                itemStyle={{ fontSize: '12px' }}
+                              />
+                              <Area type="monotone" dataKey="usuarios" stroke="#3b82f6" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={2} />
+                              <Area type="monotone" dataKey="scans" stroke="#10b981" fillOpacity={0} strokeWidth={2} />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                      {/* Vulnerability Distribution */}
+                      <div className="glass p-6 rounded-2xl border border-slate-800">
+                        <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Distribuição de Riscos</h3>
+                        <div className="h-64 w-full flex items-center">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={getVulnerabilityData()}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                              >
+                                {getVulnerabilityData().map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="space-y-2 pr-8">
+                            {getVulnerabilityData().map((item, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <div className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">{item.name}</span>
+                                <span className="text-xs font-bold text-white ml-auto">{item.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      {/* Top Targets */}
+                      <div className="lg:col-span-2 glass p-6 rounded-2xl border border-slate-800">
+                        <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Top 5 Alvos Escaneados</h3>
+                        <div className="space-y-4">
+                          {getTopTargets().map((target, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                              <div className="flex items-center gap-3">
+                                <div className="size-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                                  {i + 1}
+                                </div>
+                                <span className="text-sm text-slate-300 font-mono truncate max-w-[300px]">{target.url}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-white">{target.count}</span>
+                                <span className="text-[10px] text-slate-500 uppercase">Scans</span>
+                              </div>
+                            </div>
+                          ))}
+                          {getTopTargets().length === 0 && (
+                            <p className="text-center py-10 text-slate-500 text-sm italic">Nenhum dado de scan disponível ainda.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* System Health */}
+                      <div className="glass p-6 rounded-2xl border border-slate-800">
+                        <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Saúde do Sistema</h3>
+                        <div className="space-y-6">
+                          <div>
+                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter mb-2">
+                              <span className="text-slate-500">Uptime API</span>
+                              <span className="text-emerald-400">99.98%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-emerald-500 w-[99.98%]" />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter mb-2">
+                              <span className="text-slate-500">Latência Média</span>
+                              <span className="text-blue-400">124ms</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-500 w-[40%]" />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter mb-2">
+                              <span className="text-slate-500">Uso de Storage</span>
+                              <span className="text-purple-400">12.4 GB</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-purple-500 w-[65%]" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

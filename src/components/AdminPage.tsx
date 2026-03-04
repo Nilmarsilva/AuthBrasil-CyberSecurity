@@ -87,63 +87,41 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     is_admin: false
   });
 
-  const fetchUsers = async () => {
+  const fetchAllData = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await authService.getAllUsers();
-      setUsers(data || []);
-    } catch (err: any) {
-      console.error("Erro ao buscar usuários:", err);
-      setError(err.message || "Erro ao carregar lista de usuários.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchScans = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await scanService.getAllScans();
-      setScans(data || []);
-    } catch (err: any) {
-      console.error("Erro ao buscar scans:", err);
-      setError(err.message || "Erro ao carregar lista de scans.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchDbStats = async () => {
-    try {
-      setIsLoading(true);
-      // Real counts from Supabase
-      const { count: pCount } = await authService.getAllUsers().then(data => ({ count: data.length }));
-      const { count: sCount } = await scanService.getAllScans().then(data => ({ count: data.length }));
       
+      // Buscamos usuários e scans em paralelo para performance
+      const [usersData, scansData] = await Promise.all([
+        authService.getAllUsers(),
+        scanService.getAllScans()
+      ]);
+      
+      setUsers(usersData || []);
+      setScans(scansData || []);
+      
+      // Atualizamos também os stats do banco
       setDbStats({
-        profilesCount: pCount || 0,
-        scansCount: sCount || 0,
+        profilesCount: usersData?.length || 0,
+        scansCount: scansData?.length || 0,
         lastBackup: 'Hoje, 04:00 AM',
         dbSize: '14.8 MB'
       });
-    } catch (err) {
-      console.error("Erro ao buscar stats do banco:", err);
+    } catch (err: any) {
+      console.error("Erro ao carregar dados do dashboard:", err);
+      setError(err.message || "Erro ao carregar dados do sistema.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 'users') {
-      fetchUsers();
-    } else if (activeTab === 'scans') {
-      fetchScans();
-    } else if (activeTab === 'database') {
-      fetchDbStats();
-    }
-  }, [activeTab]);
+    fetchAllData();
+  }, []);
+
+  // Opcional: Recarregar dados específicos ao trocar de aba se necessário
+  // Mas fetchAllData já cobre tudo inicialmente
 
   const handleManageUser = (user: UserProfile) => {
     setSelectedUser(user);
@@ -623,10 +601,10 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                     {/* ... existing analytics content ... */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       {/* Growth Chart */}
-                      <div className="glass p-6 rounded-2xl border border-slate-800">
+                      <div className="glass p-6 rounded-2xl border border-slate-800 min-h-[350px]">
                         <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Crescimento (Últimos 7 dias)</h3>
-                        <div className="h-64 w-full">
-                          <ResponsiveContainer width="100%" height="100%">
+                        <div className="h-64 w-full min-w-0">
+                          <ResponsiveContainer width="100%" height="100%" debounce={100}>
                             <AreaChart data={getGrowthData()}>
                               <defs>
                                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
@@ -649,10 +627,10 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                       </div>
 
                       {/* Vulnerability Distribution */}
-                      <div className="glass p-6 rounded-2xl border border-slate-800">
+                      <div className="glass p-6 rounded-2xl border border-slate-800 min-h-[350px]">
                         <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Distribuição de Riscos</h3>
-                        <div className="h-64 w-full flex items-center">
-                          <ResponsiveContainer width="100%" height="100%">
+                        <div className="h-64 w-full flex items-center min-w-0">
+                          <ResponsiveContainer width="100%" height="100%" debounce={100}>
                             <PieChart>
                               <Pie
                                 data={getVulnerabilityData()}

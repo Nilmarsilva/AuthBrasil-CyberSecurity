@@ -13,6 +13,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { scanApiService, ScanResponse } from '../services/api';
+import { scanService, Scan } from '../services/scanService';
+import { authService } from '../services/auth';
 
 interface ReportsPageProps {
   onNavigate?: (view: any, target?: string) => void;
@@ -22,7 +24,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'medium' | 'safe'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [itemsPerPage, setItemsPerPage] = useState<number | 'all'>(5);
-  const [reports, setReports] = useState<ScanResponse[]>([]);
+  const [reports, setReports] = useState<Scan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -32,8 +34,16 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
   const fetchReports = async () => {
     try {
       setIsLoading(true);
-      const data = await scanApiService.listScans();
-      setReports(data);
+      const user = await authService.getCurrentUser();
+      if (user) {
+        const data = await scanService.getUserScans(user.id);
+        setReports(data);
+      } else {
+        // Fallback para API se não houver usuário (embora deva haver)
+        const data = await scanApiService.listScans();
+        // Mapear ScanResponse para Scan se necessário, mas aqui vamos apenas tentar Supabase primeiro
+        setReports([]); 
+      }
     } catch (error) {
       console.error("Erro ao buscar relatórios:", error);
     } finally {
@@ -41,7 +51,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
     }
   };
 
-  const handleDownloadPDF = (id: number, target: string) => {
+  const handleDownloadPDF = (id: string, target: string) => {
     // No ambiente do AI Studio, usamos o endpoint relativo
     const url = `/api/reports/pdf/${id}`;
     const link = document.createElement('a');
@@ -53,7 +63,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
   };
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = report.url.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = report.target_url.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (activeFilter === 'all') return matchesSearch;
     
@@ -201,7 +211,7 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
                       <div className="p-2 rounded bg-surface-dark border border-surface-border shrink-0">
                         <Globe className="size-4 text-slate-400" />
                       </div>
-                      <span className="text-sm font-semibold text-white tracking-wide truncate">{report.url}</span>
+                      <span className="text-sm font-semibold text-white tracking-wide truncate">{report.target_url}</span>
                     </div>
 
                     {/* Score */}
@@ -226,14 +236,14 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
                     {/* Actions */}
                     <div className="w-full md:col-span-2 flex justify-end gap-4 md:gap-2 md:opacity-60 group-hover:opacity-100 transition-opacity pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
                       <button 
-                        onClick={() => onNavigate?.('analyses', report.url)}
+                        onClick={() => onNavigate?.('analyses', report.target_url)}
                         className="flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent hover:bg-primary/20 hover:text-primary text-slate-400 transition-colors cursor-pointer" 
                       >
                         <Eye className="size-5" />
                         <span className="md:hidden text-xs font-bold">Ver</span>
                       </button>
                       <button 
-                        onClick={() => handleDownloadPDF(report.id, report.url)}
+                        onClick={() => handleDownloadPDF(report.id, report.target_url)}
                         disabled={report.status !== 'completed'}
                         className={`flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent transition-colors cursor-pointer ${report.status === 'completed' ? 'hover:bg-white/10 text-slate-400' : 'opacity-20 cursor-not-allowed'}`} 
                       >

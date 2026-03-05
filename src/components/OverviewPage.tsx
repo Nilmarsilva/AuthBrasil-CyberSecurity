@@ -14,25 +14,29 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { scanApiService, ScanResponse } from '../services/api';
+import { scanService, Scan } from '../services/scanService';
+import { authService } from '../services/auth';
 
 interface OverviewPageProps {
   onNavigate?: (view: any) => void;
 }
 
 export default function OverviewPage({ onNavigate }: OverviewPageProps) {
-  // ESTADO PARA DADOS REAIS DA API
-  const [scans, setScans] = useState<ScanResponse[]>([]);
+  // ESTADO PARA DADOS REAIS DO SUPABASE
+  const [scans, setScans] = useState<Scan[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchScans = async () => {
       try {
         setIsLoading(true);
-        // Chamada para o seu endpoint GET /scans
-        const data = await scanApiService.listScans(0, 10);
-        setScans(data);
+        const user = await authService.getCurrentUser();
+        if (user) {
+          const data = await scanService.getUserScans(user.id);
+          setScans(data);
+        }
       } catch (error) {
-        console.error("Erro ao buscar scans da API:", error);
+        console.error("Erro ao buscar scans do Supabase:", error);
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +58,7 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
   const recentActivities = scans.slice(0, 5).map(s => ({
     id: s.id,
     type: 'scan' as const,
-    target: s.url,
+    target: s.target_url,
     status: s.status === 'completed' ? 'concluído' : s.status === 'running' ? 'em execução' : s.status === 'failed' ? 'falhou' : 'pendente',
     time: new Date(s.created_at).toLocaleDateString(),
     score: s.score

@@ -125,6 +125,25 @@ export const testSupabaseConnection = async () => {
  * -- Criar bucket para avatares
  * -- Vá em Storage > New Bucket > Nome: 'avatars' > Public: true
  * 
+ * -- POLÍTICAS PARA STORAGE (AVATARES)
+ * -- 1. Permitir acesso público aos avatares
+ * CREATE POLICY "Acesso Público" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+ * 
+ * -- 2. Permitir que usuários autenticados façam upload de avatares
+ * CREATE POLICY "Upload de Avatares" ON storage.objects FOR INSERT WITH CHECK (
+ *   bucket_id = 'avatars' AND auth.role() = 'authenticated'
+ * );
+ * 
+ * -- 3. Permitir que usuários atualizem seus próprios avatares
+ * CREATE POLICY "Atualizar Próprio Avatar" ON storage.objects FOR UPDATE USING (
+ *   bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]
+ * );
+ * 
+ * -- 4. Permitir que usuários deletem seus próprios avatares
+ * CREATE POLICY "Deletar Próprio Avatar" ON storage.objects FOR DELETE USING (
+ *   bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]
+ * );
+ * 
  * -- Trigger para tornar o primeiro usuário admin automaticamente
  * CREATE OR REPLACE FUNCTION public.handle_first_user_admin()
  * RETURNS TRIGGER AS $$

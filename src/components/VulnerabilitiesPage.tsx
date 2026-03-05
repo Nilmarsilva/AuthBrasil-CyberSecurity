@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Shield, 
   HelpCircle, 
@@ -13,14 +13,33 @@ import {
   FileCode,
   FileCheck,
   Zap,
-  Bot
+  Bot,
+  AlertCircle
 } from 'lucide-react';
+import api from '../services/api';
 
 interface VulnerabilitiesPageProps {
   onNavigate?: (view: any) => void;
 }
 
 export default function VulnerabilitiesPage({ onNavigate }: VulnerabilitiesPageProps) {
+  const [detectedVulns, setDetectedVulns] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVulns = async () => {
+      try {
+        const response = await api.get('/vulnerabilities');
+        setDetectedVulns(response.data.items);
+      } catch (error) {
+        console.error("Erro ao buscar vulnerabilidades:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVulns();
+  }, []);
+
   const categories = [
     {
       icon: <Lock className="size-6" />,
@@ -166,6 +185,44 @@ export default function VulnerabilitiesPage({ onNavigate }: VulnerabilitiesPageP
       {/* Content Scroll Area */}
       <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-8">
         <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
+          
+          {/* Detected Vulnerabilities Section */}
+          {detectedVulns.length > 0 && (
+            <section className="space-y-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2 px-2">
+                <AlertCircle className="text-red-500 size-5" />
+                Vulnerabilidades Detectadas nos seus Scans
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {detectedVulns.map((vuln) => (
+                  <div key={vuln.id} className="glass-card p-4 rounded-xl border-slate-800 hover:border-primary/30 transition-all">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase ${
+                        vuln.severity === 'critical' ? 'bg-red-500/20 text-red-400' : 
+                        vuln.severity === 'high' ? 'bg-orange-500/20 text-orange-400' : 
+                        'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {vuln.severity}
+                      </span>
+                      <span className="text-[10px] text-slate-500">{vuln.status}</span>
+                    </div>
+                    <h4 className="text-sm font-bold text-white mb-1">{vuln.title}</h4>
+                    <p className="text-xs text-slate-400 line-clamp-2">{vuln.description}</p>
+                    <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between items-center">
+                      <span className="text-[10px] text-slate-500 uppercase font-bold">{vuln.category}</span>
+                      <button 
+                        onClick={() => onNavigate?.('analyses')}
+                        className="text-[10px] text-primary hover:underline font-bold"
+                      >
+                        Ver Detalhes
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Intro Section */}
           <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-6 mb-2">
             <div className="max-w-2xl">

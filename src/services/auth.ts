@@ -208,21 +208,33 @@ export const authService = {
   async uploadAvatar(userId: string, file: File) {
     if (!supabase) return "https://picsum.photos/seed/authbrasil/100/100";
     
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Math.random()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      // Organizar por pasta do usuário para facilitar políticas de segurança
+      const filePath = `${userId}/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          upsert: true,
+          cacheControl: '3600'
+        });
 
-    if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Erro detalhado do Supabase Storage:", uploadError);
+        throw uploadError;
+      }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
 
-    return publicUrl;
+      return data.publicUrl;
+    } catch (error) {
+      console.error("Erro na função uploadAvatar:", error);
+      throw error;
+    }
   },
 
   /**

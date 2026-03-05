@@ -6,6 +6,7 @@ import Database from "better-sqlite3";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import PDFDocument from "pdfkit";
+import { WebSocketServer, WebSocket } from "ws";
 
 dotenv.config();
 
@@ -53,7 +54,7 @@ const authenticate = (req: any, res: any, next: any) => {
   
   if (!process.env.SUPABASE_JWT_SECRET || process.env.SUPABASE_JWT_SECRET === 'your-jwt-secret') {
     console.warn("[Auth] SUPABASE_JWT_SECRET não configurado ou padrão. Usando modo de desenvolvimento.");
-    req.user = { sub: 'dev-user-123' };
+    req.user = { sub: 'dev-user-123', email: 'dev@example.com' };
     return next();
   }
 
@@ -64,11 +65,21 @@ const authenticate = (req: any, res: any, next: any) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
+    const decoded: any = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ error: "Token inválido" });
+  }
+};
+
+// Middleware de Admin
+const adminOnly = (req: any, res: any, next: any) => {
+  const adminEmails = ['NilmarBioSilva@gmail.com', 'admin@authbrasil.com.br'];
+  if (req.user && (adminEmails.includes(req.user.email) || req.user.sub === 'dev-user-123')) {
+    next();
+  } else {
+    res.status(403).json({ error: "Acesso negado: Apenas administradores" });
   }
 };
 
@@ -110,29 +121,37 @@ async function startServer() {
 
     // Simular processamento assíncrono (Nuclei)
     setTimeout(() => {
-      const mockResults = {
-        score: 68,
-        issues: [
-          {
-            id: `vuln-${Date.now()}-1`,
-            severity: "high",
-            category: "SSL/TLS",
-            description: "Certificado SSL expira em menos de 30 dias",
-            recommendation: "Renove o certificado SSL imediatamente."
-          },
-          {
-            id: `vuln-${Date.now()}-2`,
-            severity: "high",
-            category: "Database",
-            description: "Porta 3306 (MySQL) exposta publicamente",
-            recommendation: "Restrinja o acesso via firewall."
-          }
-        ]
-      };
+      const templates = [
+        { severity: "high", category: "SSL/TLS", description: "Certificado SSL expira em menos de 30 dias", recommendation: "Renove o certificado SSL imediatamente." },
+        { severity: "high", category: "Database", description: "Porta 3306 (MySQL) exposta publicamente", recommendation: "Restrinja o acesso via firewall." },
+        { severity: "medium", category: "Headers", description: "Falta cabeçalho Content-Security-Policy", recommendation: "Implemente uma política de CSP robusta." },
+        { severity: "medium", category: "Headers", description: "Falta cabeçalho X-Frame-Options", recommendation: "Configure X-Frame-Options para evitar Clickjacking." },
+        { severity: "low", category: "Information Disclosure", description: "Versão do servidor exposta no cabeçalho Server", recommendation: "Oculte a versão do servidor nas configurações." },
+        { severity: "critical", category: "Injection", description: "Potencial vulnerabilidade de SQL Injection detectada", recommendation: "Use prepared statements e valide todas as entradas." }
+      ];
+
+      // Selecionar aleatoriamente 2 a 4 vulnerabilidades
+      const selectedIssues = templates
+        .sort(() => 0.5 - Math.random())
+        .slice(0, Math.floor(Math.random() * 3) + 2);
+
+      const totalPoints = selectedIssues.reduce((acc, issue) => {
+        if (issue.severity === 'critical') return acc + 40;
+        if (issue.severity === 'high') return acc + 25;
+        if (issue.severity === 'medium') return acc + 10;
+        return acc + 5;
+      }, 0);
+
+      const score = Math.max(0, 100 - totalPoints);
+
+      const issuesWithId = selectedIssues.map((issue, idx) => ({
+        ...issue,
+        id: `vuln-${Date.now()}-${idx}`
+      }));
 
       // Atualizar scan
       db.prepare("UPDATE scans SET status = ?, score = ?, results = ? WHERE id = ?")
-        .run("completed", mockResults.score, JSON.stringify(mockResults.issues), scanId);
+        .run("completed", score, JSON.stringify(issuesWithId), scanId);
 
       // Inserir vulnerabilidades individuais para visão agregada
       const insertVuln = db.prepare(`
@@ -140,7 +159,7 @@ async function startServer() {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
-      mockResults.issues.forEach(issue => {
+      issuesWithId.forEach(issue => {
         insertVuln.run(
           issue.id,
           scanId,
@@ -154,6 +173,14 @@ async function startServer() {
       });
 
       console.log(`[Orquestrador] Scan ${scanId} concluído.`);
+      
+      // Notificar usuário via WebSocket
+      notifyUser(userId, {
+        type: "scan_completed",
+        scanId: scanId,
+        url: url,
+        score: score
+      });
     }, 5000); // 5 segundos de simulação
     
     res.json({
@@ -167,12 +194,13 @@ async function startServer() {
   });
 
   // Obter detalhes/resultados de um scan
-  app.get("/api/scans/:id", (req, res) => {
+  app.get("/api/scans/:id", authenticate, (req: any, res: any) => {
     const { id } = req.params;
-    const scan = db.prepare("SELECT * FROM scans WHERE id = ?").get(id);
+    const userId = req.user.sub;
+    const scan = db.prepare("SELECT * FROM scans WHERE id = ? AND user_id = ?").get(id, userId);
     
     if (!scan) {
-      return res.status(404).json({ error: "Scan não encontrado" });
+      return res.status(404).json({ error: "Scan não encontrado ou acesso negado" });
     }
 
     res.json({
@@ -194,43 +222,63 @@ async function startServer() {
   /**
    * 2. GERENCIAMENTO DE VULNERABILIDADES (AGREGADO)
    */
-  app.get("/api/vulnerabilities", (req, res) => {
-    const vulns = db.prepare("SELECT * FROM vulnerabilities ORDER BY severity DESC").all();
+  app.get("/api/vulnerabilities", authenticate, (req: any, res: any) => {
+    const userId = req.user.sub;
+    const vulns = db.prepare(`
+      SELECT v.* FROM vulnerabilities v
+      JOIN scans s ON v.scan_id = s.id
+      WHERE s.user_id = ?
+      ORDER BY v.severity DESC
+    `).all(userId);
+    
     res.json({
       total: vulns.length,
       items: vulns
     });
   });
 
-  app.patch("/api/vulnerabilities/:id", (req, res) => {
+  app.patch("/api/vulnerabilities/:id", authenticate, (req: any, res: any) => {
     const { id } = req.params;
     const { status } = req.body;
+    const userId = req.user.sub;
     
-    const info = db.prepare("UPDATE vulnerabilities SET status = ? WHERE id = ?").run(status, id);
-    
-    if (info.changes === 0) {
-      return res.status(404).json({ error: "Vulnerabilidade não encontrada" });
-    }
+    // Verificar se a vulnerabilidade pertence ao usuário
+    const vuln = db.prepare(`
+      SELECT v.id FROM vulnerabilities v
+      JOIN scans s ON v.scan_id = s.id
+      WHERE v.id = ? AND s.user_id = ?
+    `).get(id, userId);
 
+    if (!vuln) {
+      return res.status(404).json({ error: "Vulnerabilidade não encontrada ou acesso negado" });
+    }
+    
+    db.prepare("UPDATE vulnerabilities SET status = ? WHERE id = ?").run(status, id);
+    
     res.json({ message: `Vulnerabilidade ${id} atualizada para ${status}` });
   });
 
   /**
    * 3. RELATÓRIOS E ESTATÍSTICAS
    */
-  app.get("/api/reports/stats", (req, res) => {
+  app.get("/api/reports/stats", authenticate, (req: any, res: any) => {
+    const userId = req.user.sub;
     const stats = db.prepare(`
       SELECT 
         COUNT(*) as total,
-        SUM(CASE WHEN severity = 'high' THEN 1 ELSE 0 END) as high,
-        SUM(CASE WHEN severity = 'medium' THEN 1 ELSE 0 END) as medium,
-        SUM(CASE WHEN severity = 'low' THEN 1 ELSE 0 END) as low
-      FROM vulnerabilities
-    `).get();
+        SUM(CASE WHEN v.severity = 'high' THEN 1 ELSE 0 END) as high,
+        SUM(CASE WHEN v.severity = 'medium' THEN 1 ELSE 0 END) as medium,
+        SUM(CASE WHEN v.severity = 'low' THEN 1 ELSE 0 END) as low
+      FROM vulnerabilities v
+      JOIN scans s ON v.scan_id = s.id
+      WHERE s.user_id = ?
+    `).get(userId);
 
     const evolution = db.prepare(`
-      SELECT score FROM scans WHERE status = 'completed' ORDER BY created_at ASC LIMIT 10
-    `).all().map(s => s.score);
+      SELECT score FROM scans 
+      WHERE status = 'completed' AND user_id = ? 
+      ORDER BY created_at ASC LIMIT 10
+    `).all(userId).map((s: any) => s.score);
 
     res.json({
       evolution: evolution.length > 0 ? evolution : [0],
@@ -242,12 +290,13 @@ async function startServer() {
     });
   });
 
-  app.get("/api/reports/pdf/:scanId", (req, res) => {
+  app.get("/api/reports/pdf/:scanId", authenticate, (req: any, res: any) => {
     const { scanId } = req.params;
-    const scan = db.prepare("SELECT * FROM scans WHERE id = ?").get(scanId);
+    const userId = req.user.sub;
+    const scan = db.prepare("SELECT * FROM scans WHERE id = ? AND user_id = ?").get(scanId, userId);
     
     if (!scan) {
-      return res.status(404).json({ error: "Scan não encontrado" });
+      return res.status(404).json({ error: "Scan não encontrado ou acesso negado" });
     }
 
     const doc = new PDFDocument({ margin: 50 });
@@ -293,19 +342,30 @@ async function startServer() {
   /**
    * 4. ADMINISTRAÇÃO
    */
-  app.get("/api/admin/system-stats", (req, res) => {
+  app.get("/api/admin/system-stats", authenticate, adminOnly, (req, res) => {
     const stats = db.prepare(`
       SELECT 
         (SELECT COUNT(*) FROM scans) as total_scans,
-        (SELECT COUNT(*) FROM scans WHERE status = 'running') as active_scans
+        (SELECT COUNT(*) FROM scans WHERE status = 'running') as active_scans,
+        (SELECT COUNT(DISTINCT user_id) FROM scans) as total_users
     `).get();
 
     res.json({
       active_scans: stats.active_scans,
       total_scans: stats.total_scans,
+      total_users: stats.total_users,
       db_status: "healthy",
-      memory_usage: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + " MB"
+      memory_usage: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + " MB",
+      os_uptime: process.uptime().toFixed(0) + "s"
     });
+  });
+
+  app.get("/api/admin/all-scans", authenticate, adminOnly, (req, res) => {
+    const scans = db.prepare("SELECT * FROM scans ORDER BY created_at DESC LIMIT 50").all();
+    res.json(scans.map((s: any) => ({
+      ...s,
+      results: s.results ? JSON.parse(s.results) : null
+    })));
   });
 
   // --- VITE MIDDLEWARE ---
@@ -322,9 +382,57 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
+
+  // --- WEBSOCKET SETUP ---
+  const wss = new WebSocketServer({ server });
+  const clients = new Map<string, WebSocket>();
+
+  wss.on("connection", (ws, req) => {
+    // No ambiente do AI Studio, o token pode vir na query string ou ser enviado logo após a conexão
+    console.log("[WS] Novo cliente tentando conectar");
+
+    ws.on("message", (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.type === "auth" && data.token) {
+          // Validar token
+          try {
+            const decoded: any = jwt.verify(data.token, process.env.SUPABASE_JWT_SECRET!);
+            const userId = decoded.sub;
+            clients.set(userId, ws);
+            console.log(`[WS] Cliente autenticado: ${userId}`);
+            ws.send(JSON.stringify({ type: "auth_success" }));
+          } catch (e) {
+            ws.send(JSON.stringify({ type: "auth_error", message: "Token inválido" }));
+          }
+        }
+      } catch (e) {
+        console.error("[WS] Erro ao processar mensagem:", e);
+      }
+    });
+
+    ws.on("close", () => {
+      // Remover cliente do mapa
+      for (const [userId, client] of clients.entries()) {
+        if (client === ws) {
+          clients.delete(userId);
+          console.log(`[WS] Cliente desconectado: ${userId}`);
+          break;
+        }
+      }
+    });
+  });
+
+  // Função auxiliar para enviar notificações
+  const notifyUser = (userId: string, data: any) => {
+    const client = clients.get(userId);
+    if (client && client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  };
 }
 
 startServer().catch((err) => {

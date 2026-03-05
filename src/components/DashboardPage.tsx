@@ -20,8 +20,11 @@ import ReportsPage from './ReportsPage';
 import VulnerabilitiesPage from './VulnerabilitiesPage';
 import PlansPage from './PlansPage';
 import SettingsPage from './SettingsPage';
+import AdminPage from './AdminPage';
 import { motion, AnimatePresence } from 'motion/react';
 import { authService } from '../services/auth';
+import { useNotifications } from '../hooks/useNotifications';
+import { Bell, BellDot } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -37,7 +40,7 @@ interface DashboardPageProps {
   onAdmin?: () => void;
 }
 
-type ViewType = 'overview' | 'analyses' | 'reports' | 'vulnerabilities' | 'plans' | 'settings';
+type ViewType = 'overview' | 'analyses' | 'reports' | 'vulnerabilities' | 'plans' | 'settings' | 'admin';
 
 export default function DashboardPage({ onLogout, onAdmin }: DashboardPageProps) {
   const [currentView, setCurrentView] = useState<ViewType>('overview');
@@ -45,6 +48,10 @@ export default function DashboardPage({ onLogout, onAdmin }: DashboardPageProps)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const { notifications, markAsRead, clearNotifications } = useNotifications();
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -144,11 +151,15 @@ export default function DashboardPage({ onLogout, onAdmin }: DashboardPageProps)
         })}
 
         {/* Botão Admin (Apenas Visível para Administradores) */}
-        {onAdmin && (
+        {(onAdmin || userProfile?.is_admin || userProfile?.id === 'dev-user-123') && (
           <div className="pt-4 mt-4 border-t border-slate-800">
             <button
-              onClick={onAdmin}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-amber-400 hover:bg-amber-400/10 transition-all cursor-pointer border border-transparent hover:border-amber-400/20"
+              onClick={() => handleNavigate('admin')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer border border-transparent ${
+                currentView === 'admin' 
+                  ? 'bg-amber-400/10 text-amber-400 border-amber-400/20' 
+                  : 'text-amber-400/60 hover:bg-amber-400/10 hover:text-amber-400'
+              }`}
             >
               <ShieldCheck className="size-5" />
               <span className="font-bold">Painel Admin</span>
@@ -235,21 +246,75 @@ export default function DashboardPage({ onLogout, onAdmin }: DashboardPageProps)
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Header */}
-        <header className="lg:hidden flex items-center justify-between p-4 bg-slate-950 border-b border-slate-800 sticky top-0 z-50">
-          <div className="flex items-center gap-3">
+        {/* Header Superior (Desktop & Mobile) */}
+        <header className="flex items-center justify-between p-4 bg-slate-950 border-b border-slate-800 sticky top-0 z-50">
+          <div className="flex items-center gap-3 lg:hidden">
             <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-lp-primary/10 text-lp-primary border border-lp-primary/30">
               <span className="absolute inset-0 rounded-lg bg-lp-primary/20 blur-sm"></span>
               <span className="relative material-symbols-outlined" style={{ fontSize: '24px' }}>shield_lock</span>
             </div>
             <h1 className="text-lg font-bold tracking-tight text-white leading-none">AuthBrasil</h1>
           </div>
-          <button 
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 text-slate-400 hover:text-white transition-colors cursor-pointer"
-          >
-            <Menu className="size-6" />
-          </button>
+          
+          <div className="hidden lg:block">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              {menuItems.find(m => m.id === currentView)?.label || 'Admin'}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Notificações */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 text-slate-400 hover:text-white transition-colors relative cursor-pointer"
+              >
+                {unreadCount > 0 ? <BellDot className="size-5 text-primary" /> : <Bell className="size-5" />}
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 size-2 bg-primary rounded-full animate-ping" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-[100] overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+                      <h3 className="text-sm font-bold text-white">Notificações</h3>
+                      <button onClick={clearNotifications} className="text-[10px] text-slate-500 hover:text-white uppercase font-bold">Limpar</button>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500 text-xs">Nenhuma notificação nova.</div>
+                      ) : (
+                        notifications.map(n => (
+                          <div 
+                            key={n.id} 
+                            onClick={() => markAsRead(n.id)}
+                            className={`p-4 border-b border-slate-800/50 hover:bg-white/5 transition-colors cursor-pointer ${!n.read ? 'bg-primary/5' : ''}`}
+                          >
+                            <p className="text-xs text-slate-200">{n.message}</p>
+                            <p className="text-[10px] text-slate-500 mt-1">{n.timestamp.toLocaleTimeString()}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <Menu className="size-6" />
+            </button>
+          </div>
         </header>
 
         {/* Main Content */}
@@ -260,8 +325,9 @@ export default function DashboardPage({ onLogout, onAdmin }: DashboardPageProps)
           {currentView === 'vulnerabilities' && <VulnerabilitiesPage onNavigate={handleNavigate} />}
           {currentView === 'plans' && <PlansPage />}
           {currentView === 'settings' && <SettingsPage />}
+          {currentView === 'admin' && <AdminPage onBack={() => setCurrentView('overview')} />}
           {/* Placeholder for other views */}
-          {!['overview', 'analyses', 'reports', 'vulnerabilities', 'plans', 'settings'].includes(currentView) && (
+          {!['overview', 'analyses', 'reports', 'vulnerabilities', 'plans', 'settings', 'admin'].includes(currentView) && (
             <div className="flex items-center justify-center h-full text-slate-500">
               Página de {menuItems.find(m => m.id === currentView)?.label} em desenvolvimento.
             </div>

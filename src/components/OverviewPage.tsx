@@ -13,7 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { scanService, ScanResponse } from '../services/api';
+import { scanApiService, ScanResponse } from '../services/api';
 
 interface OverviewPageProps {
   onNavigate?: (view: any) => void;
@@ -21,17 +21,15 @@ interface OverviewPageProps {
 
 export default function OverviewPage({ onNavigate }: OverviewPageProps) {
   // ESTADO PARA DADOS REAIS DA API
-  // Quando você conectar o backend, use este estado para armazenar os scans
   const [scans, setScans] = useState<ScanResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // FUNÇÃO PARA BUSCAR DADOS DO SEU BACKEND FASTAPI
     const fetchScans = async () => {
       try {
         setIsLoading(true);
-        // Chamada para o seu endpoint GET /scans/
-        const data = await scanService.listScans(0, 5);
+        // Chamada para o seu endpoint GET /scans
+        const data = await scanApiService.listScans(0, 5);
         setScans(data);
       } catch (error) {
         console.error("Erro ao buscar scans da API:", error);
@@ -40,7 +38,7 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
       }
     };
 
-    // fetchScans(); // Descomente esta linha quando a API estiver online
+    fetchScans();
   }, []);
 
   const recentActivities = [

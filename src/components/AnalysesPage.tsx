@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { scanService, Scan } from '../services/scanService';
+import { scanApiService } from '../services/api';
 import { authService } from '../services/auth';
 
 interface AnalysesPageProps {
@@ -150,28 +151,46 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
     setIsScanning(true);
     
     try {
-      // Simulando o tempo de scan
+      // 1. Chamar o Backend (Simulando Nuclei)
+      const apiResponse = await scanApiService.createScan(scanTarget);
+      console.log("[Frontend] Scan iniciado no backend:", apiResponse);
+
+      // Simulando o tempo de scan (o backend já retornou 'running')
+      // Em um app real, poderíamos usar WebSockets para o progresso
       await new Promise(resolve => setTimeout(resolve, 3000));
       
+      // 2. Buscar o resultado final (Simulado)
+      const scanDetail = await scanApiService.getScanDetail(apiResponse.id);
+      console.log("[Frontend] Resultado do scan recebido:", scanDetail);
+
       const user = await authService.getCurrentUser();
-      if (user) {
-        // Salvar no Supabase
+      if (user && scanDetail.result) {
+        // 3. Salvar o resultado final no Supabase para persistência histórica
         await scanService.createScan({
           user_id: user.id,
           target_url: scanTarget,
-          score: 72, // Score simulado
+          score: scanDetail.result.score,
           status: 'completed',
-          vulnerabilities: vulnerabilities // Usando as vulnerabilidades mockadas por enquanto
+          vulnerabilities: scanDetail.result.issues.map((issue: any, idx: number) => ({
+            id: `vuln-${Date.now()}-${idx}`,
+            severity: issue.severity.toUpperCase(),
+            points: issue.severity === 'high' ? 30 : issue.severity === 'medium' ? 15 : 5,
+            title: issue.description,
+            description: issue.category,
+            status: 'Pendente',
+            remediation: issue.recommendation,
+            category: issue.category
+          }))
         });
         
         // Atualizar histórico local
         fetchHistory();
         
-        alert(`Varredura concluída para: ${scanTarget}`);
+        alert(`Varredura Nuclei concluída para: ${scanTarget}`);
       }
     } catch (error: any) {
-      console.error("Erro ao salvar scan:", error);
-      alert(`Erro ao salvar scan: ${error.message}`);
+      console.error("Erro ao realizar scan:", error);
+      alert(`Erro ao realizar scan: ${error.message || 'Verifique se o backend está rodando.'}`);
     } finally {
       setIsScanning(false);
     }

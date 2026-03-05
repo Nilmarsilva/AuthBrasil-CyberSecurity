@@ -12,8 +12,8 @@
 
 import axios from 'axios';
 
-// URL base da API (definida no .env ou fallback para localhost)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// URL base da API (definida no .env ou fallback para a mesma origem /api)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -77,22 +77,22 @@ export interface ScanDetail extends ScanResponse {
  * SERVIÇOS DE API
  */
 
-export const scanService = {
+export const scanApiService = {
   /**
    * Dispara um novo scan de segurança para uma URL.
-   * Mapeia para: POST /scans/
+   * Mapeia para: POST /scans
    */
   async createScan(url: string): Promise<ScanResponse> {
-    const response = await api.post<ScanResponse>('/scans/', { url });
+    const response = await api.post<ScanResponse>('/scans', { url });
     return response.data;
   },
 
   /**
    * Retorna a lista de todos os scans realizados.
-   * Mapeia para: GET /scans/
+   * Mapeia para: GET /scans
    */
   async listScans(skip = 0, limit = 100): Promise<ScanResponse[]> {
-    const response = await api.get<ScanResponse[]>('/scans/', {
+    const response = await api.get<ScanResponse[]>('/scans', {
       params: { skip, limit },
     });
     return response.data;

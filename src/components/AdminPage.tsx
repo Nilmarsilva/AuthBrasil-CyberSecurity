@@ -673,6 +673,26 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                             <p className="text-[10px] text-slate-500">Apagar registros {'>'} 90 dias</p>
                           </div>
                         </button>
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const res = await fetch('/api/health');
+                              const data = await res.json();
+                              alert(`Motor de Varredura: ${data.status.toUpperCase()}\nVersão: ${data.engine}`);
+                            } catch (e) {
+                              alert('Erro ao conectar com o motor de varredura.');
+                            }
+                          }}
+                          className="flex items-center gap-3 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500/40 transition-all text-left group"
+                        >
+                          <div className="size-10 rounded-lg bg-slate-900 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                            <ShieldAlert size={20} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-white">Testar Motor (Nuclei)</p>
+                            <p className="text-[10px] text-blue-400">Verificar status do orquestrador</p>
+                          </div>
+                        </button>
                       </div>
                     </div>
                   </div>

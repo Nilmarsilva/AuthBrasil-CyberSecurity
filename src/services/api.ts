@@ -11,6 +11,7 @@
  */
 
 import axios from 'axios';
+import { supabase } from '../lib/supabase';
 
 // URL base da API (definida no .env ou fallback para a mesma origem /api)
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -20,6 +21,17 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Interceptor para adicionar o token JWT do Supabase
+api.interceptors.request.use(async (config) => {
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  }
+  return config;
 });
 
 /**
@@ -61,16 +73,16 @@ export interface ScanResult {
 
 export interface ScanResponse {
   id: number;
+  user_id?: string;
   url: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
+  score?: number;
   created_at: string;
 }
 
 export interface ScanDetail extends ScanResponse {
-  result?: ScanResult;
+  results?: SecurityIssue[]; // No backend é armazenado como JSON string, mas o axios/express já entrega como objeto se parseado
   error_message?: string;
-  updated_at?: string;
-  completed_at?: string;
 }
 
 /**

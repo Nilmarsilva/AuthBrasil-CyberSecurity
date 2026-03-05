@@ -3,6 +3,11 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import PDFDocument from "pdfkit";
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +19,7 @@ const db = new Database("security_app.db");
 db.exec(`
   CREATE TABLE IF NOT EXISTS scans (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     url TEXT NOT NULL,
     status TEXT DEFAULT 'pending',
     score INTEGER DEFAULT 0,
@@ -33,6 +39,38 @@ db.exec(`
     FOREIGN KEY(scan_id) REFERENCES scans(id)
   );
 `);
+
+// Garantir que a coluna user_id existe (migração simples)
+try {
+  db.exec("ALTER TABLE scans ADD COLUMN user_id TEXT");
+} catch (e) {
+  // Coluna já existe
+}
+
+// Middleware de Autenticação (Supabase JWT)
+const authenticate = (req: any, res: any, next: any) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!process.env.SUPABASE_JWT_SECRET || process.env.SUPABASE_JWT_SECRET === 'your-jwt-secret') {
+    console.warn("[Auth] SUPABASE_JWT_SECRET não configurado ou padrão. Usando modo de desenvolvimento.");
+    req.user = { sub: 'dev-user-123' };
+    return next();
+  }
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: "Token não fornecido" });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+};
 
 async function startServer() {
   const app = express();
@@ -55,18 +93,19 @@ async function startServer() {
   });
 
   // Iniciar novo scan
-  app.post("/api/scans", async (req, res) => {
+  app.post("/api/scans", authenticate, async (req: any, res: any) => {
     const { url } = req.body;
+    const userId = req.user.sub; // 'sub' é o ID do usuário no JWT do Supabase
     
     if (!url) {
       return res.status(400).json({ error: "URL é obrigatória" });
     }
 
-    console.log(`[Orquestrador] Iniciando scan Nuclei para: ${url}`);
+    console.log(`[Orquestrador] Usuário ${userId} iniciando scan para: ${url}`);
     
-    // Inserir no banco como pendente
-    const stmt = db.prepare("INSERT INTO scans (url, status) VALUES (?, ?)");
-    const info = stmt.run(url, "running");
+    // Inserir no banco com user_id
+    const stmt = db.prepare("INSERT INTO scans (url, status, user_id) VALUES (?, ?, ?)");
+    const info = stmt.run(url, "running", userId);
     const scanId = info.lastInsertRowid;
 
     // Simular processamento assíncrono (Nuclei)
@@ -142,10 +181,11 @@ async function startServer() {
     });
   });
 
-  // Listar todos os scans
-  app.get("/api/scans", (req, res) => {
-    const scans = db.prepare("SELECT * FROM scans ORDER BY created_at DESC").all();
-    res.json(scans.map(s => ({
+  // Listar todos os scans (filtrados por usuário)
+  app.get("/api/scans", authenticate, (req: any, res: any) => {
+    const userId = req.user.sub;
+    const scans = db.prepare("SELECT * FROM scans WHERE user_id = ? ORDER BY created_at DESC").all(userId);
+    res.json(scans.map((s: any) => ({
       ...s,
       results: s.results ? JSON.parse(s.results) : null
     })));
@@ -203,7 +243,51 @@ async function startServer() {
   });
 
   app.get("/api/reports/pdf/:scanId", (req, res) => {
-    res.status(501).json({ error: "Geração de PDF será implementada com PDFKit" });
+    const { scanId } = req.params;
+    const scan = db.prepare("SELECT * FROM scans WHERE id = ?").get(scanId);
+    
+    if (!scan) {
+      return res.status(404).json({ error: "Scan não encontrado" });
+    }
+
+    const doc = new PDFDocument({ margin: 50 });
+    const filename = `Relatorio_Seguranca_${scanId}.pdf`;
+
+    res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-type', 'application/pdf');
+
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(25).text('AuthBrasil - Relatório de Segurança', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`URL Analisada: ${scan.url}`);
+    doc.text(`Data do Scan: ${new Date(scan.created_at).toLocaleString()}`);
+    doc.text(`Score Global: ${scan.score}/100`);
+    doc.moveDown();
+
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+
+    // Vulnerabilidades
+    doc.fontSize(18).text('Vulnerabilidades Encontradas', { underline: true });
+    doc.moveDown();
+
+    const issues = scan.results ? JSON.parse(scan.results) : [];
+    
+    if (issues.length === 0) {
+      doc.fontSize(12).text('Nenhuma vulnerabilidade crítica encontrada.');
+    } else {
+      issues.forEach((issue: any, index: number) => {
+        doc.fontSize(14).fillColor(issue.severity === 'high' ? 'red' : 'orange').text(`${index + 1}. ${issue.description.toUpperCase()}`);
+        doc.fontSize(10).fillColor('black').text(`Severidade: ${issue.severity}`);
+        doc.text(`Categoria: ${issue.category}`);
+        doc.text(`Recomendação: ${issue.recommendation}`);
+        doc.moveDown();
+      });
+    }
+
+    doc.end();
   });
 
   /**

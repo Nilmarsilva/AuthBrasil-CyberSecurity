@@ -164,14 +164,14 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
       console.log("[Frontend] Resultado do scan recebido:", scanDetail);
 
       const user = await authService.getCurrentUser();
-      if (user && scanDetail.result) {
+      if (user && scanDetail.results) {
         // 3. Salvar o resultado final no Supabase para persistência histórica
         await scanService.createScan({
           user_id: user.id,
           target_url: scanTarget,
-          score: scanDetail.result.score,
+          score: scanDetail.score || 0,
           status: 'completed',
-          vulnerabilities: scanDetail.result.issues.map((issue: any, idx: number) => ({
+          vulnerabilities: scanDetail.results.map((issue: any, idx: number) => ({
             id: `vuln-${Date.now()}-${idx}`,
             severity: issue.severity.toUpperCase(),
             points: issue.severity === 'high' ? 30 : issue.severity === 'medium' ? 15 : 5,

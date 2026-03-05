@@ -29,7 +29,7 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
       try {
         setIsLoading(true);
         // Chamada para o seu endpoint GET /scans
-        const data = await scanApiService.listScans(0, 5);
+        const data = await scanApiService.listScans(0, 10);
         setScans(data);
       } catch (error) {
         console.error("Erro ao buscar scans da API:", error);
@@ -41,16 +41,38 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
     fetchScans();
   }, []);
 
-  const recentActivities = [
-    { id: 1, type: 'scan', target: 'authbrasil.com.br', status: 'concluído', time: 'Há 2 horas', score: 72 },
-    { id: 2, type: 'report', target: 'Relatório Mensal', status: 'exportado', time: 'Há 5 horas' },
-    { id: 3, type: 'alert', target: 'api.cliente-alpha.com', status: 'crítico', time: 'Há 1 dia', issue: 'SSL Expirado' },
-  ];
+  // Cálculos baseados em dados reais
+  const completedScans = scans.filter(s => s.status === 'completed');
+  const globalScore = completedScans.length > 0 
+    ? Math.round(completedScans.reduce((acc, s) => acc + (s.score || 0), 0) / completedScans.length)
+    : 0;
+
+  const totalCritical = completedScans.reduce((acc, s) => acc + (s.score !== undefined && s.score < 50 ? 1 : 0), 0);
+  const totalMedium = completedScans.reduce((acc, s) => acc + (s.score !== undefined && s.score >= 50 && s.score < 85 ? 1 : 0), 0);
+  const totalLow = completedScans.reduce((acc, s) => acc + (s.score !== undefined && s.score >= 85 && s.score < 100 ? 1 : 0), 0);
+
+  const recentActivities = scans.slice(0, 5).map(s => ({
+    id: s.id,
+    type: 'scan' as const,
+    target: s.url,
+    status: s.status === 'completed' ? 'concluído' : s.status === 'running' ? 'em execução' : s.status === 'failed' ? 'falhou' : 'pendente',
+    time: new Date(s.created_at).toLocaleDateString(),
+    score: s.score
+  }));
 
   const aiInsights = [
     { id: 1, text: 'Feche a porta 3306 no servidor X para aumentar seu score em +15 pontos.', impact: 'Alto' },
     { id: 2, text: 'Atualize o Nginx para a versão 1.25 (CVE-2023-XXXX).', impact: 'Médio' },
   ];
+
+  const getScoreHealth = (score: number) => {
+    if (score >= 85) return { label: 'Excelente', color: 'text-emerald-400' };
+    if (score >= 70) return { label: 'Boa', color: 'text-primary' };
+    if (score >= 50) return { label: 'Regular', color: 'text-amber-400' };
+    return { label: 'Crítica', color: 'text-red-500' };
+  };
+
+  const health = getScoreHealth(globalScore);
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
@@ -60,29 +82,30 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
           <div className="relative size-48 flex items-center justify-center">
             <svg className="size-full -rotate-90" viewBox="0 0 100 100">
               <circle className="stroke-slate-800" cx="50" cy="50" fill="none" r="45" strokeWidth="8" />
-              <circle className="stroke-primary" cx="50" cy="50" fill="none" r="45" strokeDasharray="226, 283" strokeLinecap="round" strokeWidth="8" style={{ strokeDashoffset: 63 }} />
+              <circle className="stroke-primary" cx="50" cy="50" fill="none" r="45" strokeDasharray={`${(globalScore / 100) * 283}, 283`} strokeLinecap="round" strokeWidth="8" style={{ strokeDashoffset: 0 }} />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span className="text-6xl font-black text-white">72</span>
+              <span className="text-6xl font-black text-white">{globalScore}</span>
               <span className="text-[10px] text-primary font-bold tracking-widest uppercase">Score Global</span>
             </div>
             <div className="absolute inset-0 rounded-full shadow-[0_0_50px_rgba(59,130,246,0.2)] pointer-events-none" />
           </div>
           
           <div className="flex-1 text-center sm:text-left">
-            <h2 className="text-3xl font-bold text-white mb-3">Sua saúde digital é <span className="text-primary">Boa</span></h2>
+            <h2 className="text-3xl font-bold text-white mb-3">Sua saúde digital é <span className={health.color}>{health.label}</span></h2>
             <p className="text-slate-400 leading-relaxed mb-6">
-              Identificamos 3 vulnerabilidades críticas que estão impactando seu score. 
-              Corrija-as para atingir o nível <span className="text-emerald-400 font-bold">Excelente</span>.
+              {globalScore < 100 
+                ? `Identificamos ${totalCritical} vulnerabilidades críticas que estão impactando seu score. Corrija-as para atingir o nível Excelente.`
+                : 'Parabéns! Seu ambiente está seguro e segue as melhores práticas.'}
             </p>
             <div className="flex flex-wrap justify-center sm:justify-start gap-4">
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
                 <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                <span className="text-xs font-bold text-slate-300">10 Ativos Seguros</span>
+                <span className="text-xs font-bold text-slate-300">{completedScans.filter(s => s.score && s.score >= 85).length} Ativos Seguros</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
                 <div className="size-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                <span className="text-xs font-bold text-slate-300">2 Ativos em Risco</span>
+                <span className="text-xs font-bold text-slate-300">{completedScans.filter(s => s.score && s.score < 50).length} Ativos em Risco</span>
               </div>
             </div>
           </div>
@@ -91,22 +114,22 @@ export default function OverviewPage({ onNavigate }: OverviewPageProps) {
         <div className="lg:col-span-4 grid grid-cols-1 gap-4">
           <div className="glassmorphism rounded-2xl p-6 border-l-4 border-l-red-500 flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alertas Críticos</p>
-              <h3 className="text-2xl font-bold text-white mt-1">03</h3>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Scans Críticos</p>
+              <h3 className="text-2xl font-bold text-white mt-1">{totalCritical < 10 ? `0${totalCritical}` : totalCritical}</h3>
             </div>
             <AlertCircle className="text-red-500 size-8 opacity-50" />
           </div>
           <div className="glassmorphism rounded-2xl p-6 border-l-4 border-l-amber-500 flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alertas Médios</p>
-              <h3 className="text-2xl font-bold text-white mt-1">12</h3>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Scans Médios</p>
+              <h3 className="text-2xl font-bold text-white mt-1">{totalMedium < 10 ? `0${totalMedium}` : totalMedium}</h3>
             </div>
             <AlertCircle className="text-amber-500 size-8 opacity-50" />
           </div>
           <div className="glassmorphism rounded-2xl p-6 border-l-4 border-l-blue-500 flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Alertas Baixos</p>
-              <h3 className="text-2xl font-bold text-white mt-1">05</h3>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Scans Seguros</p>
+              <h3 className="text-2xl font-bold text-white mt-1">{totalLow < 10 ? `0${totalLow}` : totalLow}</h3>
             </div>
             <AlertCircle className="text-blue-500 size-8 opacity-50" />
           </div>

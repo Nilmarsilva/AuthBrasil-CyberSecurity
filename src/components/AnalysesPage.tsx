@@ -48,6 +48,9 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [userScans, setUserScans] = useState<Scan[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [currentVulnerabilities, setCurrentVulnerabilities] = useState<Vulnerability[]>([]);
+  const [currentScore, setCurrentScore] = useState<number>(0);
+  const [lastScanId, setLastScanId] = useState<number | null>(null);
   const lastScrollY = useRef(0);
 
   const fetchHistory = async () => {
@@ -57,6 +60,16 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
       if (user) {
         const data = await scanService.getUserScans(user.id);
         setUserScans(data);
+        
+        // Se houver histórico, carregar o último scan como padrão se não estiver scaneando
+        if (data.length > 0 && !isScanning && !currentVulnerabilities.length) {
+          const lastScan = data[0];
+          setCurrentScore(lastScan.score);
+          setCurrentVulnerabilities(lastScan.vulnerabilities.map(v => ({
+            ...v,
+            severity: v.severity as any
+          })));
+        }
       }
     } catch (error) {
       console.error("Erro ao buscar histórico:", error);
@@ -154,33 +167,38 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
       // 1. Chamar o Backend (Simulando Nuclei)
       const apiResponse = await scanApiService.createScan(scanTarget);
       console.log("[Frontend] Scan iniciado no backend:", apiResponse);
+      setLastScanId(apiResponse.id);
 
-      // Simulando o tempo de scan (o backend já retornou 'running')
-      // Em um app real, poderíamos usar WebSockets para o progresso
+      // Simulando o tempo de scan
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // 2. Buscar o resultado final (Simulado)
+      // 2. Buscar o resultado final
       const scanDetail = await scanApiService.getScanDetail(apiResponse.id);
       console.log("[Frontend] Resultado do scan recebido:", scanDetail);
 
+      const mappedVulns: Vulnerability[] = (scanDetail.results || []).map((issue: any, idx: number) => ({
+        id: `vuln-${Date.now()}-${idx}`,
+        severity: issue.severity.toUpperCase() as any,
+        points: issue.severity === 'high' ? 30 : issue.severity === 'medium' ? 15 : 5,
+        title: issue.description,
+        description: issue.category,
+        status: 'Pendente',
+        remediation: issue.recommendation,
+        category: issue.category
+      }));
+
+      setCurrentVulnerabilities(mappedVulns);
+      setCurrentScore(scanDetail.score || 0);
+
       const user = await authService.getCurrentUser();
-      if (user && scanDetail.results) {
+      if (user) {
         // 3. Salvar o resultado final no Supabase para persistência histórica
         await scanService.createScan({
           user_id: user.id,
           target_url: scanTarget,
           score: scanDetail.score || 0,
           status: 'completed',
-          vulnerabilities: scanDetail.results.map((issue: any, idx: number) => ({
-            id: `vuln-${Date.now()}-${idx}`,
-            severity: issue.severity.toUpperCase(),
-            points: issue.severity === 'high' ? 30 : issue.severity === 'medium' ? 15 : 5,
-            title: issue.description,
-            description: issue.category,
-            status: 'Pendente',
-            remediation: issue.recommendation,
-            category: issue.category
-          }))
+          vulnerabilities: mappedVulns
         });
         
         // Atualizar histórico local
@@ -197,7 +215,17 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
   };
 
   const handleExportPDF = () => {
-    alert('Gerando relatório PDF detalhado...');
+    if (!lastScanId) {
+      alert('Realize um scan primeiro para exportar o PDF.');
+      return;
+    }
+    const url = `/api/reports/pdf/${lastScanId}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Relatorio_Seguranca_${scanTarget}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleCopyCode = (code: string) => {
@@ -205,7 +233,7 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
     alert('Código copiado para a área de transferência!');
   };
 
-  const filteredVulnerabilities = vulnerabilities.filter(v => 
+  const filteredVulnerabilities = currentVulnerabilities.filter(v => 
     activeFilter === 'all' ? true : v.severity === 'ALTA'
   );
 
@@ -287,13 +315,15 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
             </div>
             <div className="security-gauge w-44 h-44 shadow-[0_0_40px_rgba(59,130,246,0.2)]">
               <div className="relative z-10 flex flex-col items-center">
-                <span className="text-5xl font-black text-white">72</span>
+                <span className="text-5xl font-black text-white">{currentScore}</span>
                 <span className="text-[10px] text-blue-400 font-bold tracking-widest uppercase">Score Global</span>
               </div>
             </div>
             <div className="mt-6 text-center">
-              <p className="text-sm font-medium text-slate-300">Sua segurança é <span className="text-blue-400 font-bold">Boa</span></p>
-              <p className="text-xs text-slate-500 mt-1">Melhore 28 pontos corrigindo as vulnerabilidades críticas.</p>
+              <p className="text-sm font-medium text-slate-300">Sua segurança é <span className="text-blue-400 font-bold">{currentScore >= 85 ? 'Excelente' : currentScore >= 70 ? 'Boa' : currentScore >= 50 ? 'Regular' : 'Crítica'}</span></p>
+              <p className="text-xs text-slate-500 mt-1">
+                {currentScore < 100 ? `Melhore ${100 - currentScore} pontos corrigindo as vulnerabilidades.` : 'Parabéns! Nenhuma vulnerabilidade encontrada.'}
+              </p>
             </div>
           </div>
 
@@ -347,7 +377,7 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
               <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 Problemas de Segurança 
                 <span className="bg-red-500/20 text-red-500 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">
-                  {vulnerabilities.filter(v => v.status === 'Pendente').length} ativos
+                  {currentVulnerabilities.filter(v => v.status === 'Pendente').length} ativos
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-500">Lista detalhada de vulnerabilidades encontradas.</p>
@@ -371,7 +401,7 @@ export default function AnalysesPage({ target }: AnalysesPageProps) {
                     : 'bg-red-500/5 border-red-500/10 text-red-500/60 hover:bg-red-500/10'
                 }`}
               >
-                CRÍTICOS ({vulnerabilities.filter(v => v.severity === 'ALTA').length})
+                CRÍTICOS ({currentVulnerabilities.filter(v => v.severity === 'ALTA').length})
               </button>
             </div>
           </div>

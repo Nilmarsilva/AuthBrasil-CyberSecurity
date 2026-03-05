@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   Search, 
@@ -9,8 +9,10 @@ import {
   Database, 
   ChevronDown,
   AlertCircle,
-  ListFilter
+  ListFilter,
+  Loader2
 } from 'lucide-react';
+import { scanApiService, ScanResponse } from '../services/api';
 
 interface ReportsPageProps {
   onNavigate?: (view: any, target?: string) => void;
@@ -20,44 +22,63 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'critical' | 'medium' | 'safe'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [itemsPerPage, setItemsPerPage] = useState<number | 'all'>(5);
+  const [reports, setReports] = useState<ScanResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const reports = [
-    { date: '15 Out 2023', time: '14:30', target: 'authbrasil.com.br', type: 'language', score: '98 (A+)', status: 'success', issues: '0 Críticos, 2 Baixos' },
-    { date: '14 Out 2023', time: '09:15', target: 'api.cliente-alpha.com', type: 'dns', score: '45 (F)', status: 'danger', issues: '5 Críticos, 12 Médios' },
-    { date: '12 Out 2023', time: '18:45', target: 'github.com/auth-lib', type: 'code', score: '72 (C)', status: 'warning', issues: '1 Crítico, 4 Médios' },
-    { date: '10 Out 2023', time: '11:20', target: 'dev.plataforma-beta.io', type: 'language', score: '88 (B)', status: 'primary', issues: '0 Críticos, 3 Médios' },
-    { date: '08 Out 2023', time: '16:00', target: 'legacy-system.net', type: 'storage', score: '32 (F)', status: 'danger', issues: '8 Críticos, 15 Médios' },
-  ];
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      setIsLoading(true);
+      const data = await scanApiService.listScans();
+      setReports(data);
+    } catch (error) {
+      console.error("Erro ao buscar relatórios:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDownloadPDF = (id: number, target: string) => {
+    // No ambiente do AI Studio, usamos o endpoint relativo
+    const url = `/api/reports/pdf/${id}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Relatorio_Seguranca_${target}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = report.target.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = report.url.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (activeFilter === 'all') return matchesSearch;
-    if (activeFilter === 'critical') return matchesSearch && report.status === 'danger';
-    if (activeFilter === 'medium') return matchesSearch && (report.status === 'warning' || report.status === 'primary');
-    if (activeFilter === 'safe') return matchesSearch && report.status === 'success';
+    
+    const score = report.score || 0;
+    if (activeFilter === 'critical') return matchesSearch && score < 50;
+    if (activeFilter === 'medium') return matchesSearch && score >= 50 && score < 85;
+    if (activeFilter === 'safe') return matchesSearch && score >= 85;
     
     return matchesSearch;
   });
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'language': return <Globe className="size-4 text-slate-400" />;
-      case 'dns': return <svg className="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H3V12M21 12V17H3V12M21 12H3M18 7V17M6 7V17" /></svg>;
-      case 'code': return <Code className="size-4 text-slate-400" />;
-      case 'storage': return <Database className="size-4 text-slate-400" />;
-      default: return <Globe className="size-4 text-slate-400" />;
-    }
+  const getStatusStyles = (score?: number) => {
+    if (score === undefined) return 'bg-slate-800 text-slate-400 border-slate-700';
+    if (score >= 85) return 'bg-status-success/10 border-status-success/20 text-status-success shadow-neon-green';
+    if (score < 50) return 'bg-status-danger/10 border-status-danger/20 text-status-danger shadow-neon-red';
+    return 'bg-status-warning/10 border-status-warning/20 text-status-warning';
   };
 
-  const getStatusStyles = (status: string) => {
-    switch (status) {
-      case 'success': return 'bg-status-success/10 border-status-success/20 text-status-success shadow-neon-green';
-      case 'danger': return 'bg-status-danger/10 border-status-danger/20 text-status-danger shadow-neon-red';
-      case 'warning': return 'bg-status-warning/10 border-status-warning/20 text-status-warning';
-      case 'primary': return 'bg-primary/10 border-primary/30 text-blue-300';
-      default: return '';
-    }
+  const getScoreLabel = (score?: number) => {
+    if (score === undefined) return 'Pendente';
+    if (score >= 95) return `${score} (A+)`;
+    if (score >= 85) return `${score} (A)`;
+    if (score >= 70) return `${score} (B)`;
+    if (score >= 50) return `${score} (C)`;
+    return `${score} (F)`;
   };
 
   return (
@@ -153,70 +174,68 @@ export default function ReportsPage({ onNavigate }: ReportsPageProps) {
                 DATA/HORA
                 <ChevronDown className="size-3" />
               </div>
-              <div className="col-span-3">DOMÍNIO/REPO</div>
+              <div className="col-span-3">DOMÍNIO/URL</div>
               <div className="col-span-2 text-center">SCORE FINAL</div>
-              <div className="col-span-3">PROBLEMAS ENCONTRADOS</div>
+              <div className="col-span-3">STATUS DO SCAN</div>
               <div className="col-span-2 text-right">AÇÕES</div>
             </div>
             
             {/* Table Body (Scrollable) */}
             <div className="flex-1 overflow-y-auto">
-              {filteredReports.length > 0 ? (
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center h-full py-20 text-slate-500">
+                  <Loader2 className="size-12 mb-4 animate-spin text-primary" />
+                  <p className="text-lg font-medium">Carregando relatórios...</p>
+                </div>
+              ) : filteredReports.length > 0 ? (
                 filteredReports.slice(0, itemsPerPage === 'all' ? filteredReports.length : itemsPerPage).map((report, index) => (
-                  <div key={index} className="flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-surface-border hover:bg-white/5 transition-colors items-center group">
+                  <div key={report.id} className="flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-surface-border hover:bg-white/5 transition-colors items-center group">
                     {/* Date/Time */}
                     <div className="w-full md:col-span-2 flex md:flex-col justify-between md:justify-center items-center md:items-start">
-                      <span className="text-sm font-medium text-slate-200">{report.date}</span>
-                      <span className="text-xs text-slate-500">{report.time}</span>
+                      <span className="text-sm font-medium text-slate-200">{new Date(report.created_at).toLocaleDateString()}</span>
+                      <span className="text-xs text-slate-500">{new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     
                     {/* Domain/Repo */}
                     <div className="w-full md:col-span-3 flex items-center gap-3">
                       <div className="p-2 rounded bg-surface-dark border border-surface-border shrink-0">
-                        {getIcon(report.type)}
+                        <Globe className="size-4 text-slate-400" />
                       </div>
-                      <span className="text-sm font-semibold text-white tracking-wide truncate">{report.target}</span>
+                      <span className="text-sm font-semibold text-white tracking-wide truncate">{report.url}</span>
                     </div>
 
                     {/* Score */}
                     <div className="w-full md:col-span-2 flex md:justify-center items-center justify-between">
                       <span className="md:hidden text-xs text-slate-500 font-bold uppercase">Score:</span>
-                      <div className={`px-3 py-1 rounded-full border text-[10px] font-bold flex items-center gap-1 ${getStatusStyles(report.status)}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${report.status === 'danger' ? 'bg-status-danger animate-pulse' : report.status === 'success' ? 'bg-status-success' : report.status === 'warning' ? 'bg-status-warning' : 'bg-blue-400'}`}></span>
-                        {report.score}
+                      <div className={`px-3 py-1 rounded-full border text-[10px] font-bold flex items-center gap-1 ${getStatusStyles(report.score)}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${report.score && report.score < 50 ? 'bg-status-danger animate-pulse' : report.score && report.score >= 85 ? 'bg-status-success' : 'bg-status-warning'}`}></span>
+                        {getScoreLabel(report.score)}
                       </div>
                     </div>
 
-                    {/* Issues */}
+                    {/* Status */}
                     <div className="w-full md:col-span-3 flex flex-col justify-center">
                       <div className="flex items-center justify-between md:justify-start gap-2">
-                        <span className="md:hidden text-xs text-slate-500 font-bold uppercase">Problemas:</span>
-                        {report.status === 'danger' ? (
-                          <div className="flex items-center gap-2 text-status-danger font-medium text-xs">
-                            <AlertCircle className="size-3" />
-                            {report.issues.split(',')[0]}
-                          </div>
-                        ) : report.status === 'warning' ? (
-                          <span className="text-xs text-status-warning font-medium">{report.issues.split(',')[0]}</span>
-                        ) : (
-                          <span className="text-xs text-slate-400">{report.issues.split(',')[0]}</span>
-                        )}
+                        <span className="md:hidden text-xs text-slate-500 font-bold uppercase">Status:</span>
+                        <span className={`text-xs font-medium ${report.status === 'completed' ? 'text-status-success' : report.status === 'failed' ? 'text-status-danger' : 'text-primary animate-pulse'}`}>
+                          {report.status === 'completed' ? 'Concluído' : report.status === 'running' ? 'Em Execução' : report.status === 'failed' ? 'Falhou' : 'Pendente'}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-slate-500 md:pl-5 text-right md:text-left">{report.issues.split(',')[1]}</span>
                     </div>
 
                     {/* Actions */}
                     <div className="w-full md:col-span-2 flex justify-end gap-4 md:gap-2 md:opacity-60 group-hover:opacity-100 transition-opacity pt-2 md:pt-0 border-t md:border-t-0 border-white/5">
                       <button 
-                        onClick={() => onNavigate?.('analyses', report.target)}
+                        onClick={() => onNavigate?.('analyses', report.url)}
                         className="flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent hover:bg-primary/20 hover:text-primary text-slate-400 transition-colors cursor-pointer" 
                       >
                         <Eye className="size-5" />
                         <span className="md:hidden text-xs font-bold">Ver</span>
                       </button>
                       <button 
-                        onClick={() => alert(`Iniciando download do relatório: ${report.target}`)}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent hover:bg-white/10 text-slate-400 transition-colors cursor-pointer" 
+                        onClick={() => handleDownloadPDF(report.id, report.url)}
+                        disabled={report.status !== 'completed'}
+                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 md:block p-2 md:p-1.5 rounded bg-white/5 md:bg-transparent transition-colors cursor-pointer ${report.status === 'completed' ? 'hover:bg-white/10 text-slate-400' : 'opacity-20 cursor-not-allowed'}`} 
                       >
                         <Download className="size-5" />
                         <span className="md:hidden text-xs font-bold">PDF</span>
